@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on My New Hugo Site</title>
+    <title>Posts on Mickael Asghar</title>
     <link>https://Mik3asg.github.io/posts/</link>
-    <description>Recent content in Posts on My New Hugo Site</description>
+    <description>Recent content in Posts on Mickael Asghar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 19 Feb 2024 17:31:15 +0000</lastBuildDate><atom:link href="https://Mik3asg.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
@@ -14,6 +14,17 @@
       
       <guid>https://Mik3asg.github.io/posts/my-first-post/</guid>
       <description>This is my first post on my blog </description>
+    </item>
+    
+    <item>
+      <title> Building a simple REST API in Golang with MUX, PostgreSQL and Docker</title>
+      <link>https://Mik3asg.github.io/posts/rest-api-golang-docker-postgresql/</link>
+      <pubDate>Fri, 09 Feb 2024 00:17:09 +0000</pubDate>
+      
+      <guid>https://Mik3asg.github.io/posts/rest-api-golang-docker-postgresql/</guid>
+      <description>Overview This project demonstrates building a basic REST API in Golang, implementing CRUD operations with a PostgreSQL database for data persistence. The application utilises Gorilla Mux for routing, PostgreSQL for the database, and Docker for containerisation.
+The API manages user information, including name, email, and city.
+Note: As of now, this demo does not include a user interface as it has not been built for the purpose of this demo. The code for this demo is available on GitHub.</description>
     </item>
     
   </channel>

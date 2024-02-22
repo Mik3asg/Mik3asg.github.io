@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title> Building a simple REST API in Golang with MUX, PostgreSQL and Docker // Mickael Asghar</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.92.2" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Mickael Asghar" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.48c54506445c0c947ae5773134b722acbd6275d3518cf2c59b86563e1a118878.css" />
+    
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content=" Building a simple REST API in Golang with MUX, PostgreSQL and Docker"/>
+<meta name="twitter:description" content="Overview This project demonstrates building a basic REST API in Golang, implementing CRUD operations with a PostgreSQL database for data persistence. The application utilises Gorilla Mux for routing, PostgreSQL for the database, and Docker for containerisation.
+The API manages user information, including name, email, and city.
+Note: As of now, this demo does not include a user interface as it has not been built for the purpose of this demo. The code for this demo is available on GitHub."/>
+
+    <meta property="og:title" content=" Building a simple REST API in Golang with MUX, PostgreSQL and Docker" />
+<meta property="og:description" content="Overview This project demonstrates building a basic REST API in Golang, implementing CRUD operations with a PostgreSQL database for data persistence. The application utilises Gorilla Mux for routing, PostgreSQL for the database, and Docker for containerisation.
+The API manages user information, including name, email, and city.
+Note: As of now, this demo does not include a user interface as it has not been built for the purpose of this demo. The code for this demo is available on GitHub." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Mik3asg.github.io/posts/rest-api-golang-docker-postgresql/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-02-09T00:17:09+00:00" />
+<meta property="article:modified_time" content="2024-02-09T00:17:09+00:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://Mik3asg.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="Mickael Asghar" /></a>
+      <span class="app-header-title">Mickael Asghar</span>
+      <nav class="app-header-menu">
+          <a class="app-header-menu-item" href="/">Home</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/tags/">Tags</a>
+      </nav>
+      <p>Welcome to SystemsGo.live – my blog where I share my experiences and insights in cloud-native technologies, DevOps practices, IT automation, and various IT topics.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/mik3asg" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+          <a href="https://www.linkedin.com/in/m-asghar/" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-linkedin">
+  <title>LinkedIn</title>
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title"> Building a simple REST API in Golang with MUX, PostgreSQL and Docker</h1>
+      <div class="post-meta">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Feb 9, 2024
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          4 min read
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag">
+  <title>tag</title>
+  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>
+</svg>
+              <a class="tag" href="https://Mik3asg.github.io/tags/golang/">Golang</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/docker/">Docker</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/postgresql/">PostgreSQL</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/api/">API</a>
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h2 id="overview">Overview</h2>
+<p>This project demonstrates building a basic REST API in Golang, implementing CRUD operations with a PostgreSQL database for data persistence. The application utilises Gorilla Mux for routing, PostgreSQL for the database, and Docker for containerisation.</p>
+<p>The API manages user information, including name, email, and city.</p>
+<p><img src="https://i.imgur.com/HotRBa0.png" alt="Image alt text"></p>
+<p><strong>Note:</strong> As of now, this demo does not include a user interface as it has not been built for the purpose of this demo. The code for this demo is available on <a href="https://github.com/Mik3asg/Rest-API-Golang-Mux-PostgreSQL-Docker">GitHub</a>.</p>
+<h2 id="pre-requisitesassumptions">Pre-requisites/Assumptions:</h2>
+<ul>
+<li>Download and <a href="https://go.dev/doc/install">Install GO</a> on your local machine.</li>
+<li>Download and <a href="https://docs.docker.com/desktop/">Install Docker Desktop</a>.</li>
+<li>Use your preferred IDE (e.g. Visual Studio Code).</li>
+<li>Download and <a href="https://learning.postman.com/docs/getting-started/basics/about-postman-agent/#the-postman-desktop-agent">Install Postman Desktop Agent</a> to test the API locally.</li>
+<li>Use a PostgreSQL desktop/terminal client (e.g. Sqlectron).</li>
+</ul>
+<h2 id="architecturedesign-overview">Architecture/Design Overview</h2>
+<p><img src="https://i.imgur.com/a1dhHQ3.png" alt="HLD"></p>
+<h2 id="setting-up-the-environment">Setting up the environment</h2>
+<ol>
+<li>
+<p>Clone the repository:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">git clone https://github.com/Mik3asg/Rest-API-Golang-Mux-PostgreSQL-Docker.git
+</code></pre></div></li>
+<li>
+<p>Navigate to the project directory:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cd Rest-API-Golang-Mux-PostgreSQL-Docker
+</code></pre></div></li>
+<li>
+<p>Dependencies:</p>
+</li>
+</ol>
+<p>This project uses Go modules for dependency management. The necessary dependencies, including Gorilla Mux for handling HTTP routing and pq for PostgreSQL database interaction, are already included in the <code>go.mod</code> and <code>go.sum</code> files.
+These dependencies were initially installed using the following commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go mod init api  <span style="color:#75715e"># Initializes a GO module named &#39;api&#39; for dependency management</span>
+go get github.com/gorilla/mux  <span style="color:#75715e"># Installs Gorilla Mux for handling HTTP routing in Go</span>
+go get github.com/lib/pq  <span style="color:#75715e"># Installs pq, PostgreSQL driver for Go&#39;s database/sql package</span>
+</code></pre></div><p>However, users do not need to run these commands themselves, as the dependencies are already included in the project. Simply clone the repository and ensure you have Go installed on your machine.
+If you&rsquo;re not familiar with Go modules, you can learn more about them <a href="https://blog.golang.org/using-go-modules">here</a>.</p>
+<ol start="4">
+<li>Run Docker Engine on your local machine</li>
+</ol>
+<h2 id="setting-up-postgresql-authentication">Setting up PostgreSQL Authentication</h2>
+<p>To configure authentication for the PostgreSQL database used in this project, you need to set up environment variables in a <code>.env</code> file. Follow these steps:</p>
+<ol>
+<li>
+<p>Create a new file named <code>.env</code> in the root directory of your project.</p>
+</li>
+<li>
+<p>Open the <code>.env</code> file in a text editor and add the following lines:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">POSTGRES_USER=your_postgres_username
+POSTGRES_PASSWORD=your_postgres_password
+POSTGRES_DB=your_database_name
+</code></pre></div><p>Replace <code>your_postgres_username</code>, <code>your_postgres_password</code>, and <code>your_database_name</code> with your actual PostgreSQL credentials.</p>
+</li>
+<li>
+<p>Save the <code>.env</code> file in the same directory as your <code>docker-compose.yml</code>file, and Docker Compose will automatically read these environment variables when you run <code>docker-compose up</code>.</p>
+</li>
+</ol>
+<p>These environment variables will be read by Docker Compose and used to authenticate your application with the PostgreSQL database.</p>
+<h2 id="start-the-postgresql-database-container">Start the PostgreSQL Database Container</h2>
+<p>Run the following command to start the PostgreSQL database service (<code>go-db</code>) defined in the <code>docker-compose.yml</code> file. The <code>-d</code> flag runs the container in detached mode, allowing it to run in the background.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker compose up -d go-db  
+</code></pre></div><h2 id="build-and-run-the-custom-crud-go-api">Build and Run the custom CRUD GO API</h2>
+<p>These commands build the custom Go application defined in the <code>docker-compose.yml</code> file and then run it using Docker Compose.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker compose build  <span style="color:#75715e"># Build the custom Go app</span>
+docker compose up go-app  <span style="color:#75715e"># Run the custom Go app</span>
+</code></pre></div><h2 id="validate-the-setup">Validate the setup</h2>
+<p>Run the following commands:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker images  <span style="color:#75715e"># Check the status of Docker images for go-db and go-app</span>
+docker ps  <span style="color:#75715e"># Check the status of running Docker containers for go-db and go-app</span>
+</code></pre></div><h2 id="test-api-endpoints">Test API endpoints</h2>
+<p>Once the application is running, you can access it in your web browser at <code>http://localhost:8080</code> . We will use Postman as an API Platform to test our API endpoints.</p>
+<p>In addition, we can use a PostgreSQL client to check the data being stored in the database for each endpoint. Please refer to your database credentials defined in your <code>.env</code> file.</p>
+<h3 id="create-user-with-post">Create User with POST</h3>
+<ul>
+<li>
+<p>Endpoint: <code>POST localhost:8000/users</code></p>
+</li>
+<li>
+<p>To create a new user, send a POST request to <code>localhost:8000/users</code> with a JSON body containing the user details.</p>
+</li>
+<li>
+<p>Use a PostgreSQL client to verify the new user data was inserted into the database.</p>
+</li>
+</ul>
+<h3 id="get-all-users">GET All Users</h3>
+<ul>
+<li>
+<p>Endpoint: <code>GET localhost:8000/users</code></p>
+</li>
+<li>
+<p>To get all existing users, send a GET request to <code>localhost:8000/users</code>.</p>
+</li>
+<li>
+<p>The response will contain a JSON array of all users.</p>
+</li>
+<li>
+<p>Check the PostgreSQL client to verify the user data being returned.</p>
+</li>
+</ul>
+<h3 id="get-single-user">GET Single User</h3>
+<ul>
+<li>
+<p>Endpoint: <code>GET localhost:8000/users/&lt;id&gt;</code></p>
+</li>
+<li>
+<p>To get a specific user, send a GET request to <code>localhost:8000/users/&lt;id&gt;</code> where <code>&lt;id&gt;</code> is the id of the desired user.</p>
+</li>
+<li>
+<p>Check the PostgreSQL client that the correct user data is being returned based on the id.</p>
+</li>
+</ul>
+<h3 id="put-update-user">PUT Update User</h3>
+<ul>
+<li>
+<p>Endpoint: <code>PUT localhost:8000/users/&lt;id&gt;</code></p>
+</li>
+<li>
+<p>To update a user, send a PUT request to <code>localhost:8000/users/&lt;id&gt;</code> where <code>&lt;id&gt;</code> is the id of the user to update.</p>
+</li>
+<li>
+<p>Use the PostgreSQL client to verify the user data was updated in the database.</p>
+</li>
+</ul>
+<h3 id="delete-user">DELETE User</h3>
+<ul>
+<li>
+<p>Endpoint: <code>DELETE localhost:8000/users/&lt;id&gt;</code></p>
+</li>
+<li>
+<p>To delete a user, send a DELETE request to <code>localhost:8000/users/&lt;id&gt;</code> where <code>&lt;id&gt;</code> is the id of the user to delete.</p>
+</li>
+<li>
+<p>Check the PostgreSQL client that the user was removed from the database.</p>
+</li>
+</ul>
+<h3 id="error-handling">Error Handling</h3>
+<ul>
+<li>
+<p>Invalid Endpoint: <code>GET/PUT/DELETE localhost:8000/users/&lt;invalid_id&gt;</code></p>
+</li>
+<li>
+<p>If an invalid <code>&lt;id&gt;</code> is provided in the endpoint for GET, PUT or DELETE requests, the API will return a 404 status with the message &ldquo;User not found&rdquo;.</p>
+</li>
+<li>
+<p>The PostgreSQL client will show that no data was changed.</p>
+</li>
+</ul>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>
