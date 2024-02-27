@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Mickael Asghar</title>
-    <link>https://Mik3asg.github.io/</link>
-    <description>Recent content on Mickael Asghar</description>
+    <title>CICD on Mickael Asghar</title>
+    <link>https://Mik3asg.github.io/tags/cicd/</link>
+    <description>Recent content in CICD on Mickael Asghar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 26 Feb 2024 21:00:49 +0000</lastBuildDate><atom:link href="https://Mik3asg.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 26 Feb 2024 21:00:49 +0000</lastBuildDate><atom:link href="https://Mik3asg.github.io/tags/cicd/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Flask App deployment into Amazon EKS, using CICD Pipeline with Jenkins and Argo CD</title>
       <link>https://Mik3asg.github.io/posts/flask-app-jenkins-cicd-argocd-k8s/</link>
@@ -15,17 +15,6 @@
       <guid>https://Mik3asg.github.io/posts/flask-app-jenkins-cicd-argocd-k8s/</guid>
       <description>Overview This project showcases an end-to-end DevOps pipeline for deploying a basic Flask application using Jenkins Pipeline and GitOps (with ArgoCD) on an Amazon Elastic Kubernetes Service (EKS) cluster. It utilises two Git repositories:
  GitHub Repository for Continous Integration hosting our basic Flask application code GitHub Repository for GitOps and Update of K8s Manifest  Pre-requisites/Assumptions:  AWS Account created AWS CLI installed on local machine IAM user set up with AWS access key ID and AWS secret access key kubectl installed on local machine DockerHub Account created Application code hosted on GIT Repository  Architecture/Design Overview Installation and Setup   Spin up an AWS EC2 instance for a Jenkins server:</description>
-    </item>
-    
-    <item>
-      <title> Building a simple REST API in Golang with MUX, PostgreSQL and Docker</title>
-      <link>https://Mik3asg.github.io/posts/rest-api-golang-docker-postgresql/</link>
-      <pubDate>Fri, 09 Feb 2024 00:17:09 +0000</pubDate>
-      
-      <guid>https://Mik3asg.github.io/posts/rest-api-golang-docker-postgresql/</guid>
-      <description>Overview This project demonstrates building a basic REST API in Golang, implementing CRUD operations with a PostgreSQL database for data persistence. The application utilises Gorilla Mux for routing, PostgreSQL for the database, and Docker for containerisation.
-The API manages user information, including name, email, and city.
-Note: As of now, this demo does not include an user interface as it has not been built for the purpose of this demo. The code for this demo is available on GitHub.</description>
     </item>
     
   </channel>

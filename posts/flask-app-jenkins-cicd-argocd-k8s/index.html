@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Flask App deployment into Amazon EKS, using CICD Pipeline with Jenkins and Argo CD // Mickael Asghar</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.92.2" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Mickael Asghar" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.48c54506445c0c947ae5773134b722acbd6275d3518cf2c59b86563e1a118878.css" />
+    
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Flask App deployment into Amazon EKS, using CICD Pipeline with Jenkins and Argo CD"/>
+<meta name="twitter:description" content="Overview This project showcases an end-to-end DevOps pipeline for deploying a basic Flask application using Jenkins Pipeline and GitOps (with ArgoCD) on an Amazon Elastic Kubernetes Service (EKS) cluster. It utilises two Git repositories:
+ GitHub Repository for Continous Integration hosting our basic Flask application code GitHub Repository for GitOps and Update of K8s Manifest  Pre-requisites/Assumptions:  AWS Account created AWS CLI installed on local machine IAM user set up with AWS access key ID and AWS secret access key kubectl installed on local machine DockerHub Account created Application code hosted on GIT Repository  Architecture/Design Overview Installation and Setup   Spin up an AWS EC2 instance for a Jenkins server:"/>
+
+    <meta property="og:title" content="Flask App deployment into Amazon EKS, using CICD Pipeline with Jenkins and Argo CD" />
+<meta property="og:description" content="Overview This project showcases an end-to-end DevOps pipeline for deploying a basic Flask application using Jenkins Pipeline and GitOps (with ArgoCD) on an Amazon Elastic Kubernetes Service (EKS) cluster. It utilises two Git repositories:
+ GitHub Repository for Continous Integration hosting our basic Flask application code GitHub Repository for GitOps and Update of K8s Manifest  Pre-requisites/Assumptions:  AWS Account created AWS CLI installed on local machine IAM user set up with AWS access key ID and AWS secret access key kubectl installed on local machine DockerHub Account created Application code hosted on GIT Repository  Architecture/Design Overview Installation and Setup   Spin up an AWS EC2 instance for a Jenkins server:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Mik3asg.github.io/posts/flask-app-jenkins-cicd-argocd-k8s/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-02-26T21:00:49+00:00" />
+<meta property="article:modified_time" content="2024-02-26T21:00:49+00:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://Mik3asg.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="Mickael Asghar" /></a>
+      <span class="app-header-title">Mickael Asghar</span>
+      <nav class="app-header-menu">
+          <a class="app-header-menu-item" href="/">Home</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/tags/">Tags</a>
+      </nav>
+      <p>Welcome to SystemsGo.live – my blog where I share my experiences and insights in cloud-native technologies, DevOps practices, IT automation, and various IT topics.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/mik3asg" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+          <a href="https://www.linkedin.com/in/m-asghar/" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-linkedin">
+  <title>LinkedIn</title>
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">Flask App deployment into Amazon EKS, using CICD Pipeline with Jenkins and Argo CD</h1>
+      <div class="post-meta">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Feb 26, 2024
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          4 min read
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag">
+  <title>tag</title>
+  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>
+</svg>
+              <a class="tag" href="https://Mik3asg.github.io/tags/flask/">Flask</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/eks/">EKS</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/cicd/">CICD</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/jenkins/">Jenkins</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/argocd/">ArgoCD</a>
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h2 id="overview">Overview</h2>
+<p>This project showcases an end-to-end DevOps pipeline for deploying a basic Flask application using Jenkins Pipeline and GitOps (with ArgoCD) on an Amazon Elastic Kubernetes Service (EKS) cluster. It utilises two Git repositories:</p>
+<ul>
+<li><a href="https://github.com/Mik3asg/Flask-App-Jenkins-CI-EKS.git">GitHub Repository for Continous Integration hosting our basic Flask application code</a></li>
+<li><a href="https://github.com/Mik3asg/Flask-App-Jenkins-GitOps-EKS.git">GitHub Repository for GitOps and Update of K8s Manifest</a></li>
+</ul>
+<h2 id="pre-requisitesassumptions">Pre-requisites/Assumptions:</h2>
+<ul>
+<li>AWS Account created</li>
+<li>AWS CLI installed on local machine</li>
+<li>IAM user set up with AWS access key ID and AWS secret access key</li>
+<li>kubectl installed on local machine</li>
+<li>DockerHub Account created</li>
+<li>Application code hosted on GIT Repository</li>
+</ul>
+<h2 id="architecturedesign-overview">Architecture/Design Overview</h2>
+<p><img src="/jenkins-cicd.png" alt="HLD"></p>
+<h2 id="installation-and-setup">Installation and Setup</h2>
+<ol>
+<li>
+<p><strong>Spin up an AWS EC2 instance for a Jenkins server:</strong></p>
+<ul>
+<li>
+<p>Specs:</p>
+<ul>
+<li>Instance Type: <code>t3.small</code></li>
+<li>OS: <code>Ubuntu</code></li>
+<li>Storage: <code>15 GiB gp2</code></li>
+<li>SG Inbound rules: <code>TCP/22, TCP/8080</code></li>
+</ul>
+</li>
+<li>
+<p>SSH into your EC2 instance to install Jenkins and Docker packages.</p>
+</li>
+<li>
+<p>Use the <code>user-data</code> section within the EC2 Console to incorporate the following bash script for installing Java, Jenkins, and Docker packages:</p>
+<ul>
+<li><strong>Warning:</strong> Java 11 support in Jenkins ends after Sep 30, 2024. Installing an unsupported Java version may cause Jenkins to fail. Upgrade Java to a newer version. Refer to the <a href="https://www.jenkins.io/doc/book/platform-information/support-policy-java/">documentation</a> for details.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#!/bin/bash
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e"># Update and upgrade the system</span>
+sudo apt update <span style="color:#f92672">&amp;&amp;</span> sudo apt upgrade -y
+
+<span style="color:#75715e"># Install Java</span>
+sudo apt install -y openjdk-11-jre
+
+<span style="color:#75715e"># Install Jenkins</span>
+curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo gpg --dearmor -o /usr/share/keyrings/jenkins-keyring.gpg
+echo deb <span style="color:#f92672">[</span>signed-by<span style="color:#f92672">=</span>/usr/share/keyrings/jenkins-keyring.gpg<span style="color:#f92672">]</span> https://pkg.jenkins.io/debian binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list &gt; /dev/null
+sudo apt-get update
+sudo apt-get install -y jenkins
+
+<span style="color:#75715e"># Install Docker</span>
+sudo apt install -y docker.io
+
+<span style="color:#75715e"># Grant Jenkins user permission to Docker daemon</span>
+sudo usermod -aG docker jenkins
+sudo systemctl enable docker
+sudo systemctl restart docker
+</code></pre></div></li>
+<li>
+<p>SSH into your Jenkins EC2 instance and check status of packages by running the following commands:</p>
+<ul>
+<li><code>java -version</code></li>
+<li><code>sudo systemctl status jenkins</code></li>
+<li><code>sudo systemctl status docker </code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Configure your Jenkins Server in UI:</strong></p>
+<ul>
+<li>Install the necessary plugins by navigating to <code>Manage Jenkins &gt; Plugins &gt; Available Plugins</code>. Choose <code>Docker</code>, <code>Docker Pipeline</code> and <code>GitHub integration</code></li>
+<li>Restart Jenkins server</li>
+<li>Configure Credentials: <code>Manage Jenkins &gt; Credentials &gt; Global &gt; Add Credentials</code>
+<ul>
+<li>for GitHub (<code>id=github, username=your_username, password=token_generated_in_GitHub</code>)</li>
+<li>for DockerHub (<code>id=dockerhub, username=your_username, password=your_dockerhub_pwd</code>)</li>
+</ul>
+</li>
+<li>Create 2 Jenkins Jobs:
+<ul>
+<li>For CI Pipeline:
+<ul>
+<li><code>New Item &gt; Name=BuildAppJob &gt; Pipeline</code>
+<ul>
+<li>Build Triggers=<code>GitHub hook trigger for GITScm polling</code></li>
+<li>Navigate to the GitHub repository settings and enable the Webhook by following these steps:
+<ul>
+<li><code>Settings &gt; Webhook &gt; Payload URL = http://jenkins_server_public_ip:8080/github-weebhook/</code>)</li>
+<li><code>Content type=application/json</code>.</li>
+</ul>
+</li>
+<li>Confirm Add webhook</li>
+<li>Pipeline Definition=<code>Pipeline script from SCM</code>
+<ul>
+<li>SCM=<code>GIT</code></li>
+<li>Script Path = <code>Jenkinsfile</code></li>
+<li>Repository URL=<code>https://github.com/Mik3asg/Flask_App_Jenkins_CI_EKS.git</code></li>
+<li>Credentials=<code>none</code></li>
+<li>Branch Specifier=<code>*/main</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>For CD Pipeline:
+<ul>
+<li><code>New Item &gt; Name=UpdateK8sManifestJob &gt; Pipeline</code>
+<ul>
+<li>Select <code>This project is parameterized</code></li>
+<li>String Parameter: Name=<code>DOCKERTAG</code>, Default Value=<code>latest</code></li>
+<li>Pipeline Definition=<code>Pipeline script from SCM</code>
+<ul>
+<li>SCM=<code>GIT</code></li>
+<li>Script Path:<code>Jenkinsfile</code></li>
+<li>Repo URL=<code>https://github.com/Mik3asg/Flask_App_Jenkins_GitOps_EKS.git</code></li>
+<li>Credentials=<code>none</code> # public repo</li>
+<li>Branch Specifier=<code>*/main</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Provision an AWS EKS Cluster via AWS CLI</strong></p>
+<ul>
+<li>
+<p>Access your AWS Account via <code>aws configure</code> in the Terminal of your local machine</p>
+</li>
+<li>
+<p>Provide the credentials of your IAM user (access key ID and secret key) and region</p>
+<blockquote>
+<p><strong>Note:</strong> For consistency, use the same region in which you have created your previous EC2 instance for Jenkins server, i.e. us-east-1</p>
+</blockquote>
+</li>
+<li>
+<p>Create an AWS EKS Cluster</p>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">eksctl create cluster --name &lt;flask-eks&gt; --region us-east-1 --nodegroup-name &lt;my-nodes&gt; --node-type t3.small --managed --nodes <span style="color:#ae81ff">2</span> <span style="color:#75715e"># Replace &lt;flask-eks&gt; and &lt;my-nodes&gt; with your desired values</span>
+</code></pre></div><ul>
+<li>Check the status of EKS Cluster (if up and running)</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">eksctl get cluster --name demo-eks --region us-east-1
+</code></pre></div><ul>
+<li>Run <code>kubectl get nodes</code> command to verify the status of the nodes</li>
+</ul>
+</li>
+<li>
+<p><strong>Installation and Configuration Argo CD</strong></p>
+<ul>
+<li>Via CLI:
+<ul>
+<li>Follow steps provided in the official <a href="https://argo-cd.readthedocs.io/en/stable/getting_started/">Argo CD Documentation</a> to:
+<ul>
+<li>
+<p>Install Argo CD via CLI</p>
+</li>
+<li>
+<p>Connect to the API server from local machine and access to UI using <code>https://localhost:8080</code></p>
+<blockquote>
+<p><strong>Note:</strong> Keep the <code>kubectl port-forwarding</code> terminal open to avoid disrupting access to the UI. Open a new terminal if you need CLI access.</p>
+</blockquote>
+</li>
+<li>
+<p>Retrieve Password for UI access</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>In UI:
+<ul>
+<li>Application Name=<code>flask-gitops-demo</code></li>
+<li>Project Name=<code>Default</code></li>
+<li>SYNC POLICY=<code>Automatic</code></li>
+<li>REPO URL: <code>&lt;Github_repo_hosting_CD_Pipeline&gt;</code></li>
+<li>Path:<code>./</code></li>
+<li>Cluster URL=<code>https://kubernetes.default.svc</code></li>
+<li>Namespace=<code>default</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Commit a new code change and test app deployment</strong></p>
+<ul>
+<li>Check status in Jenkins UI of both Jobs: <code>BuildAppJob</code> for CI Pipeline and <code>UpdateK8sManifestJob</code> for CD Pipeline</li>
+<li>Check status of pods: <code>kubectl get pods</code></li>
+<li>Check status in Argo CD UI</li>
+</ul>
+<p><img src="https://i.imgur.com/l1MlaPK.png" alt="Argo CD"></p>
+<ul>
+<li>Retrieve load balancer endpoint by running <code>kubectl get svc</code>, then paste into web browser to access the web application</li>
+</ul>
+</li>
+</ol>
+<h2 id="clean-up-resources">Clean-up resources</h2>
+<p>Delete AWS EKS Cluster</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">eksctl delete cluster --name flask-eks --region us-east-1  <span style="color:#75715e">#Replace &lt;flask-eks&gt; with the value you defined for your cluster</span>
+</code></pre></div><p><code>Terminate</code> the running EC2 instance for Jenkins server in AWS Console Management</p>
+
+    </div>
+    
+    <hr>
+    <div class="post-footer">
+      
+    </div>
+    <footer>
+    <p>If you found this post valuable or have some feedback to share, connect with me on <a href="https://www.linkedin.com/in/yourprofile">LinkedIn</a> or email me at <a href="mailto:mickael.asghar@gmail.com">mickael.asghar@gmail.com</a>.</p>
+</footer>
+ 
+  </article>
+
+    </main>
+  </body>
+</html>

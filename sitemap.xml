@@ -2,14 +2,32 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://Mik3asg.github.io/</loc>
-    <lastmod>2024-02-19T17:31:15+00:00</lastmod>
+    <loc>https://Mik3asg.github.io/tags/argocd/</loc>
+    <lastmod>2024-02-26T21:00:49+00:00</lastmod>
   </url><url>
-    <loc>https://Mik3asg.github.io/posts/my-first-post/</loc>
-    <lastmod>2024-02-19T17:31:15+00:00</lastmod>
+    <loc>https://Mik3asg.github.io/tags/cicd/</loc>
+    <lastmod>2024-02-26T21:00:49+00:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/tags/eks/</loc>
+    <lastmod>2024-02-26T21:00:49+00:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/tags/flask/</loc>
+    <lastmod>2024-02-26T21:00:49+00:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/posts/flask-app-jenkins-cicd-argocd-k8s/</loc>
+    <lastmod>2024-02-26T21:00:49+00:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/tags/jenkins/</loc>
+    <lastmod>2024-02-26T21:00:49+00:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/</loc>
+    <lastmod>2024-02-26T21:00:49+00:00</lastmod>
   </url><url>
     <loc>https://Mik3asg.github.io/posts/</loc>
-    <lastmod>2024-02-19T17:31:15+00:00</lastmod>
+    <lastmod>2024-02-26T21:00:49+00:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/tags/</loc>
+    <lastmod>2024-02-26T21:00:49+00:00</lastmod>
   </url><url>
     <loc>https://Mik3asg.github.io/posts/rest-api-golang-docker-postgresql/</loc>
     <lastmod>2024-02-09T00:17:09+00:00</lastmod>
@@ -24,9 +42,6 @@
     <lastmod>2024-02-09T00:17:09+00:00</lastmod>
   </url><url>
     <loc>https://Mik3asg.github.io/tags/postgresql/</loc>
-    <lastmod>2024-02-09T00:17:09+00:00</lastmod>
-  </url><url>
-    <loc>https://Mik3asg.github.io/tags/</loc>
     <lastmod>2024-02-09T00:17:09+00:00</lastmod>
   </url><url>
     <loc>https://Mik3asg.github.io/categories/</loc>
