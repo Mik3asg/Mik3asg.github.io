@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en-us">
   <head>
-    <title>Logrotate Configuration Setup // Mickael Asghar</title>
+    <title>Logrotate Configuration Setup in AlmaLinux 8.9 // Mickael Asghar</title>
     <link rel="shortcut icon" href="/favicon.ico" />
     <meta charset="utf-8" />
     <meta name="generator" content="Hugo 0.92.2" />
@@ -13,12 +13,12 @@
 
     
     <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Logrotate Configuration Setup"/>
-<meta name="twitter:description" content="Logrotate Configuration Setup Introduction Before diving into the details, I want to share an overview of a recent log rotation project I worked on. Below is a breakdown of the tasks, challenges, and solutions, all while protecting confidential data. By implementing these solutions, we reduced log file disk usage from 6GB to 2GB—a 66.7% reduction.
+<meta name="twitter:title" content="Logrotate Configuration Setup in AlmaLinux 8.9"/>
+<meta name="twitter:description" content="Logrotate Configuration Setup in AlmaLinux 8.9 Introduction Before diving into the details, I want to share an overview of a recent log rotation project I worked on. Below is a breakdown of the tasks, challenges, and solutions, all while protecting confidential data. By implementing these solutions, we reduced log file disk usage from 6GB to 2GB—a 66.7% reduction.
 Logrotate helps manage log files by automatically rotating, compressing, and removing them when they become too large or outdated, preventing excessive disk space usage and ensuring system stability."/>
 
-    <meta property="og:title" content="Logrotate Configuration Setup" />
-<meta property="og:description" content="Logrotate Configuration Setup Introduction Before diving into the details, I want to share an overview of a recent log rotation project I worked on. Below is a breakdown of the tasks, challenges, and solutions, all while protecting confidential data. By implementing these solutions, we reduced log file disk usage from 6GB to 2GB—a 66.7% reduction.
+    <meta property="og:title" content="Logrotate Configuration Setup in AlmaLinux 8.9" />
+<meta property="og:description" content="Logrotate Configuration Setup in AlmaLinux 8.9 Introduction Before diving into the details, I want to share an overview of a recent log rotation project I worked on. Below is a breakdown of the tasks, challenges, and solutions, all while protecting confidential data. By implementing these solutions, we reduced log file disk usage from 6GB to 2GB—a 66.7% reduction.
 Logrotate helps manage log files by automatically rotating, compressing, and removing them when they become too large or outdated, preventing excessive disk space usage and ensuring system stability." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://Mik3asg.github.io/posts/logrotate-configuration-setup/" /><meta property="article:section" content="posts" />
@@ -61,7 +61,7 @@ Logrotate helps manage log files by automatically rotating, compressing, and rem
       
   <article class="post">
     <header class="post-header">
-      <h1 class ="post-title">Logrotate Configuration Setup</h1>
+      <h1 class ="post-title">Logrotate Configuration Setup in AlmaLinux 8.9</h1>
       <div class="post-meta">
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
@@ -91,7 +91,7 @@ Logrotate helps manage log files by automatically rotating, compressing, and rem
       </div>
     </header>
     <div class="post-content">
-      <h1 id="logrotate-configuration-setup">Logrotate Configuration Setup</h1>
+      <h1 id="logrotate-configuration-setup--in-almalinux-89">Logrotate Configuration Setup  in AlmaLinux 8.9</h1>
 <h2 id="introduction"><strong>Introduction</strong></h2>
 <p>Before diving into the details, I want to share an overview of a recent log rotation project I worked on. Below is a breakdown of the tasks, challenges, and solutions, all while protecting confidential data. By implementing these solutions, we reduced log file disk usage from 6GB to 2GB—a 66.7% reduction.</p>
 <p>Logrotate helps manage log files by automatically rotating, compressing, and removing them when they become too large or outdated, preventing excessive disk space usage and ensuring system stability.</p>
@@ -146,9 +146,7 @@ Logrotate helps manage log files by automatically rotating, compressing, and rem
 <p>Logrotate is designed to ease the administration of systems that generate large numbers of log files. It allows automatic rotation, compression, removal, and mailing of log files. Each log file may be handled daily, weekly, monthly, or when it grows too large.</p>
 <p>Source: <a href="https://linux.die.net/man/8/logrotate">https://linux.die.net/man/8/logrotate</a></p>
 <h2 id="requirements">Requirements</h2>
-<p>Implement custom logrotate configurations for Tomcat and MySQL DB virtual servers for disk space optimisation.
-The list below is not exhaustive.</p>
-<p>To do this, we define specific directives in the logrotate configurations, including:</p>
+<p>Implement custom logrotate configurations for Tomcat and MySQL DB virtual servers for disk space optimisation. To do this, we define specific directives in the logrotate configurations, including:</p>
 <ul>
 <li>Setting the occurrence of log rotation (e.g., daily) for timely rotation of log files.</li>
 <li>Specifying the retention policy for rotated log files (e.g., retaining the last 10 rotations).</li>
@@ -175,7 +173,7 @@ The list below is not exhaustive.</p>
 </tr>
 <tr>
 <td>Linux</td>
-<td><code>cat /etc/os-release</code> or <code>uname -a</code></td>
+<td><code>cat /etc/os-release</code></td>
 <td>AlmaLinux 8.9</td>
 <td>12/08/2024</td>
 </tr>
@@ -282,11 +280,11 @@ java.util.logging.ConsoleHandler.encoding = UTF-8
 org.apache.catalina.core.ContainerBase.[Catalina].[localhost].level = INFO
 org.apache.catalina.core.ContainerBase.[Catalina].[localhost].handlers = 2localhost.org.apache.juli.AsyncFileHandler
 
-# These logs are no longer required
+# These logs are no longer required for our project
 #org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/manager].level = INFO
 #org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/manager].handlers = 3manager.org.apache.juli.AsyncFileHandler
 
-# These logs are no longer required
+# These logs are no longer required for our project
 #org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/host-manager].level = INFO
 #org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/host-manager].handlers = 4host-manager.org.apache.juli.AsyncFileHandler
 </code></pre><p>After making the changes, perform the following steps:</p>
@@ -296,7 +294,7 @@ org.apache.catalina.core.ContainerBase.[Catalina].[localhost].handlers = 2localh
 <li>Reboot the VM <code>reboot</code> command.</li>
 </ul>
 <h4 id="delete-unnecessary-archived-logs-in-opttomcatlogsarchived-directory">Delete Unnecessary Archived Logs in <code>/opt/tomcat/logs/archived/</code> directory</h4>
-<p>Logs such as <code>task-debug.YYYY-MM-DD.log</code> and <code>debug.YYYY-MM-DD.2.log</code> are generated for debugging purposes and are not needed. These can be safely removed to free up disk space.
+<p>Logs such as <code>task-debug.YYYY-MM-DD.log</code> and <code>debug.YYYY-MM-DD.2.log</code> are generated for debugging purposes and are not needed for this project. These can be safely removed to free up disk space.
 As a temporary solution, we are using a cron job to remove the contents of this directory. To prevent these logs from being created in the future, their generation and rotation must be disabled at the application level.</p>
 <p>To set up the cron job:</p>
 <ul>
