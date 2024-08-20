@@ -15,11 +15,11 @@
     <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Flask App deployment into Amazon EKS, using CICD Pipeline with Jenkins and Argo CD"/>
 <meta name="twitter:description" content="Overview This project showcases an end-to-end DevOps pipeline for deploying a basic Flask application using Jenkins Pipeline and GitOps (with ArgoCD) on an Amazon Elastic Kubernetes Service (EKS) cluster. It utilises two Git repositories:
- GitHub Repository for Continous Integration hosting our basic Flask application code GitHub Repository for GitOps and Update of K8s Manifest  Pre-requisites/Assumptions:  AWS Account created AWS CLI installed on local machine IAM user set up with AWS access key ID and AWS secret access key kubectl installed on local machine DockerHub Account created Application code hosted on GIT Repository  Architecture/Design Overview Installation and Setup   Spin up an AWS EC2 instance for a Jenkins server:"/>
+ GitHub Repository for Continous Integration hosting our basic Flask application code GitHub Repository for GitOps and Update of K8s Manifest  Pre-requisites/Assumptions:  AWS Account created AWS CLI installed on local machine IAM user set up with AWS access key ID and AWS secret access key kubectl installed on local machine DockerHub Account created Application code hosted on GIT Repository  Architecture/Design Overview Installation and Setup 1."/>
 
     <meta property="og:title" content="Flask App deployment into Amazon EKS, using CICD Pipeline with Jenkins and Argo CD" />
 <meta property="og:description" content="Overview This project showcases an end-to-end DevOps pipeline for deploying a basic Flask application using Jenkins Pipeline and GitOps (with ArgoCD) on an Amazon Elastic Kubernetes Service (EKS) cluster. It utilises two Git repositories:
- GitHub Repository for Continous Integration hosting our basic Flask application code GitHub Repository for GitOps and Update of K8s Manifest  Pre-requisites/Assumptions:  AWS Account created AWS CLI installed on local machine IAM user set up with AWS access key ID and AWS secret access key kubectl installed on local machine DockerHub Account created Application code hosted on GIT Repository  Architecture/Design Overview Installation and Setup   Spin up an AWS EC2 instance for a Jenkins server:" />
+ GitHub Repository for Continous Integration hosting our basic Flask application code GitHub Repository for GitOps and Update of K8s Manifest  Pre-requisites/Assumptions:  AWS Account created AWS CLI installed on local machine IAM user set up with AWS access key ID and AWS secret access key kubectl installed on local machine DockerHub Account created Application code hosted on GIT Repository  Architecture/Design Overview Installation and Setup 1." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://Mik3asg.github.io/posts/flask-app-jenkins-cicd-argocd-k8s/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2024-02-26T21:00:49+00:00" />
@@ -109,10 +109,33 @@
 <h2 id="architecturedesign-overview">Architecture/Design Overview</h2>
 <p><img src="/jenkins-cicd.png" alt="HLD"></p>
 <h2 id="installation-and-setup">Installation and Setup</h2>
-<ol>
-<li>
-<p><strong>Spin up an AWS EC2 instance for a Jenkins server:</strong></p>
+<h3 id="1-spin-up-an-aws-ec2-instance-for-a-jenkins-server">1. Spin up an AWS EC2 instance for a Jenkins server:</h3>
+<h4 id="specs">Specs:</h4>
+<table>
+<thead>
+<tr>
+<th>Instance Type</th>
+<th>OS</th>
+<th>Storage</th>
+<th>SG I/O Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>t3.small</td>
+<td>Ubuntu</td>
+<td>15 GiB gp2</td>
+<td>TCP/22, TCP/8080</td>
+</tr>
+</tbody>
+</table>
 <ul>
+<li>
+<p>SSH into your EC2 instance to install Jenkins and Docker packages.</p>
+</li>
+<li>
+<p>Use the <code>user-data</code> section within the EC2 Console to incorporate the following bash script for installing Java, Jenkins, and Docker packages:</p>
+</li>
 <li>
 <p>Specs:</p>
 <ul>
@@ -161,9 +184,7 @@ sudo systemctl restart docker
 </ul>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>Configure your Jenkins Server in UI:</strong></p>
+<h3 id="2-configure-jenkins">2. Configure Jenkins</h3>
 <ul>
 <li>Install the necessary plugins by navigating to <code>Manage Jenkins &gt; Plugins &gt; Available Plugins</code>. Choose <code>Docker</code>, <code>Docker Pipeline</code> and <code>GitHub integration</code></li>
 <li>Restart Jenkins server</li>
@@ -184,9 +205,9 @@ sudo systemctl restart docker
 <ul>
 <li><code>Settings &gt; Webhook &gt; Payload URL = http://jenkins_server_public_ip:8080/github-weebhook/</code>)</li>
 <li><code>Content type=application/json</code>.</li>
+<li>Confirm Add webhook</li>
 </ul>
 </li>
-<li>Confirm Add webhook</li>
 <li>Pipeline Definition=<code>Pipeline script from SCM</code>
 <ul>
 <li>SCM=<code>GIT</code></li>
@@ -222,9 +243,7 @@ sudo systemctl restart docker
 </ul>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>Provision an AWS EKS Cluster via AWS CLI</strong></p>
+<h3 id="3-provision-aws-eks-ckuster-through-aws-cli">3. Provision AWS EKS Ckuster, through AWS CLI</h3>
 <ul>
 <li>
 <p>Access your AWS Account via <code>aws configure</code> in the Terminal of your local machine</p>
@@ -247,9 +266,7 @@ sudo systemctl restart docker
 </code></pre></div><ul>
 <li>Run <code>kubectl get nodes</code> command to verify the status of the nodes</li>
 </ul>
-</li>
-<li>
-<p><strong>Installation and Configuration Argo CD</strong></p>
+<h3 id="4-installation-and-configuration-of-argo-cd">4. Installation and Configuration of Argo CD</h3>
 <ul>
 <li>Via CLI:
 <ul>
@@ -283,9 +300,7 @@ sudo systemctl restart docker
 </ul>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>Commit a new code change and test app deployment</strong></p>
+<h3 id="5-commit-a-new-code-change-and-test-app-deployment">5. Commit a new code change and test app deployment</h3>
 <ul>
 <li>Check status in Jenkins UI of both Jobs: <code>BuildAppJob</code> for CI Pipeline and <code>UpdateK8sManifestJob</code> for CD Pipeline</li>
 <li>Check status of pods: <code>kubectl get pods</code></li>
@@ -295,8 +310,6 @@ sudo systemctl restart docker
 <ul>
 <li>Retrieve load balancer endpoint by running <code>kubectl get svc</code>, then paste into web browser to access the web application</li>
 </ul>
-</li>
-</ol>
 <h2 id="clean-up-resources">Clean-up resources</h2>
 <p>Delete AWS EKS Cluster</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">eksctl delete cluster --name flask-eks --region us-east-1  <span style="color:#75715e">#Replace &lt;flask-eks&gt; with the value you defined for your cluster</span>

@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Logrotate Configuration Setup // Mickael Asghar</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.92.2" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Mickael Asghar" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.d2eb6bbc251bcca91087898d589e1227cdc54d7c9080e0ae47b4490a9b225a71.css" />
+    
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Logrotate Configuration Setup"/>
+<meta name="twitter:description" content="Logrotate Configuration Setup Introduction Before diving into the details, I want to share an overview of a recent log rotation project I worked on. Below is a breakdown of the tasks, challenges, and solutions, all while protecting confidential data. By implementing these solutions, we reduced log file disk usage from 6GB to 2GB—a 66.7% reduction.
+Logrotate helps manage log files by automatically rotating, compressing, and removing them when they become too large or outdated, preventing excessive disk space usage and ensuring system stability."/>
+
+    <meta property="og:title" content="Logrotate Configuration Setup" />
+<meta property="og:description" content="Logrotate Configuration Setup Introduction Before diving into the details, I want to share an overview of a recent log rotation project I worked on. Below is a breakdown of the tasks, challenges, and solutions, all while protecting confidential data. By implementing these solutions, we reduced log file disk usage from 6GB to 2GB—a 66.7% reduction.
+Logrotate helps manage log files by automatically rotating, compressing, and removing them when they become too large or outdated, preventing excessive disk space usage and ensuring system stability." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Mik3asg.github.io/posts/logrotate-configuration-setup/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-08-20T13:49:28+01:00" />
+<meta property="article:modified_time" content="2024-08-20T13:49:28+01:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://Mik3asg.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="Mickael Asghar" /></a>
+      <span class="app-header-title">Mickael Asghar</span>
+      <nav class="app-header-menu">
+          <a class="app-header-menu-item" href="/">Home</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/tags/">Tags</a>
+      </nav>
+      <p>Welcome to SystemsGo.live – my blog where I share my experiences and insights in cloud-native technologies, DevOps practices, IT automation, and various IT topics.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/mik3asg" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+          <a href="https://www.linkedin.com/in/m-asghar/" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-linkedin">
+  <title>LinkedIn</title>
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">Logrotate Configuration Setup</h1>
+      <div class="post-meta">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Aug 20, 2024
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          13 min read
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag">
+  <title>tag</title>
+  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>
+</svg>
+              <a class="tag" href="https://Mik3asg.github.io/tags/logrotate/">Logrotate</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/linux/">Linux</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/sysadmin/">SysAdmin</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/diskspaceoptimisation/">DiskSpaceOptimisation</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/logmanagement/">LogManagement</a>
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h1 id="logrotate-configuration-setup">Logrotate Configuration Setup</h1>
+<h2 id="introduction"><strong>Introduction</strong></h2>
+<p>Before diving into the details, I want to share an overview of a recent log rotation project I worked on. Below is a breakdown of the tasks, challenges, and solutions, all while protecting confidential data. By implementing these solutions, we reduced log file disk usage from 6GB to 2GB—a 66.7% reduction.</p>
+<p>Logrotate helps manage log files by automatically rotating, compressing, and removing them when they become too large or outdated, preventing excessive disk space usage and ensuring system stability.</p>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#what-is-logrotate-in-a-nutshell">What is logrotate in a nutshell?</a></li>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#version-information-for-logrotate-linux-tomcat-and-mysql">Version Information for Logrotate Linux Tomcat and MySQL</a></li>
+<li><a href="#scope-of-logs-per-logrotate-configuration-file">Scope of logs per logrotate configuration file</a></li>
+<li><a href="#implementation-of-tomcat-log-rotation">Implementation of Tomcat Log Rotation</a>
+<ul>
+<li><a href="#prerequisite---disable-internal-tomcat-log-rotation-process">Prerequisite - Disable internal Tomcat log rotation process</a>
+<ul>
+<li><a href="#edit-opt-tomcat-confloggingproperties-configuration-file">Edit <code>/opt/tomcat/conf/logging.properties</code> configuration file</a></li>
+<li><a href="#edit-opt-tomcat-confserverxml-configuration-file">Edit <code>/opt/tomcat/conf/server.xml</code> configuration file</a></li>
+<li><a href="#delete-unnecessary-archived-logs-in-opt-tomcatlogsarchived-directory">Delete Unnecessary Archived Logs in <code>/opt/tomcat/logs/archived/</code> directory</a></li>
+</ul>
+</li>
+<li><a href="#logrotate-configuration-for-catalinaout-log-files">Logrotate Configuration for <code>catalina.out</code> log files</a></li>
+<li><a href="#logrotate-configuration-for-tomcat-miscellaneous-logs">Logrotate Configuration for Tomcat Miscellaneous Logs</a></li>
+</ul>
+</li>
+<li><a href="#logrotate-configuration-for-httpd-log-files">Logrotate Configuration for <code>httpd</code> log files</a></li>
+<li><a href="#logrotate-configuration-for-unisonlog-file">Logrotate Configuration for <code>unison.log</code> file</a>
+<ul>
+<li><a href="#changing-the-selinux-context-for-rootunisonlog">Changing the SELinux Context for <code>/root/unison.log</code></a></li>
+<li><a href="#custom-cron-job-for-unison-log">Custom cron job for unison log</a></li>
+</ul>
+</li>
+<li><a href="#logrotate-configuration-for-mysql-related-log-files">Logrotate Configuration for MySQL-related log files</a>
+<ul>
+<li><a href="#configuring-mysql-authentication-for-log-rotation">Configuring MySQL Authentication for Log Rotation</a></li>
+</ul>
+</li>
+<li><a href="#logrotate-troubleshooting-and-best-practices">Logrotate Troubleshooting and Best Practices</a>
+<ul>
+<li><a href="#refer-to-linux-manual-page">Refer to Linux Manual Page</a></li>
+<li><a href="#maintain-root-ownership-for-logrotate-configuration-files">Maintain Root Ownership for Logrotate Configuration Files</a></li>
+<li><a href="#verify-ownership-permission-and-selinux-settings-of-log-files">Verify Ownership Permission and SELinux settings of log files</a></li>
+<li><a href="#understanding-the-su-directive-with-specific-create-settings">Understanding the ‘su’ Directive with Specific ‘create’ Settings</a></li>
+<li><a href="#run-manual-test">Run Manual Test</a></li>
+<li><a href="#debug-mode">Debug Mode</a></li>
+<li><a href="#last-log-rotation-timestamps-by-logrotate">Last Log Rotation Timestamps by Logrotate</a></li>
+<li><a href="#compression-issue">Compression Issue</a></li>
+<li><a href="#verify-full-file-paths">Verify Full File Paths</a></li>
+<li><a href="#check-for-typos">Check for Typos</a></li>
+<li><a href="#curly-braces-and-comments">Curly Braces and Comments</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="what-is-logrotate-in-a-nutshell">What is logrotate in a nutshell?</h2>
+<p>Logrotate is designed to ease the administration of systems that generate large numbers of log files. It allows automatic rotation, compression, removal, and mailing of log files. Each log file may be handled daily, weekly, monthly, or when it grows too large.</p>
+<p>Source: <a href="https://linux.die.net/man/8/logrotate">https://linux.die.net/man/8/logrotate</a></p>
+<h2 id="requirements">Requirements</h2>
+<p>Implement custom logrotate configurations for Tomcat and MySQL DB virtual servers for disk space optimisation.
+The list below is not exhaustive.</p>
+<p>To do this, we define specific directives in the logrotate configurations, including:</p>
+<ul>
+<li>Setting the occurrence of log rotation (e.g., daily) for timely rotation of log files.</li>
+<li>Specifying the retention policy for rotated log files (e.g., retaining the last 10 rotations).</li>
+<li>Leveraging the compress directive.</li>
+<li>Configuring the ownership and permissions for the rotated log files to ensure appropriate access and security.</li>
+</ul>
+<h2 id="version-information-for-logrotate-linux-tomcat-and-mysql">Version Information for Logrotate Linux Tomcat and MySQL</h2>
+<p>The logrotate configuration detailed in this document has been developed and tested on the following system versions. Knowing the version compatibility across these components is crucial to ensure that everything functions correctly and performs optimally.</p>
+<table>
+<thead>
+<tr>
+<th>Service/Tool</th>
+<th>Command</th>
+<th>Output</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Logrotate</td>
+<td><code>logrotate --version</code></td>
+<td>logrotate 3.14.0</td>
+<td>12/08/2024</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td><code>cat /etc/os-release</code> or <code>uname -a</code></td>
+<td>AlmaLinux 8.9</td>
+<td>12/08/2024</td>
+</tr>
+<tr>
+<td>Tomcat</td>
+<td><code>/opt/tomcat/bin/version.sh</code></td>
+<td>Apache Tomcat/9.0.83</td>
+<td>12/08/2024</td>
+</tr>
+<tr>
+<td>MySQL</td>
+<td><code>mysql -V</code></td>
+<td>mysql Ver 8.0.37 for Linux on x86_64 (MySQL Community Server - GPL)</td>
+<td>12/08/2024</td>
+</tr>
+</tbody>
+</table>
+<h2 id="scope-of-logs-per-logrotate-configuration-file">Scope of logs per logrotate configuration file</h2>
+<p>The table below outlines the scope of log files managed by each logrotate configuration. Complete scripts for each logrotate configuration file are provided in the subsequent sections of this document.</p>
+<table>
+<thead>
+<tr>
+<th>Logrotate configuration</th>
+<th>Log files</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/etc/logrotate.d/catalina_out</code></td>
+<td><code>/opt/tomcat/logs/catalina.out</code></td>
+</tr>
+<tr>
+<td><code>/etc/logrotate.d/tomcat_misc</code></td>
+<td><code>/opt/tomcat/logs/catalina.log</code>, <code>/opt/tomcat/logs/localhost.log</code>, <code>/opt/tomcat/logs/localhost_access_log.txt</code>, <code>/opt/tomcat/logs/debug.log</code>, <code>/opt/tomcat/logs/task-debug.log</code>, <code>/opt/tomcat/logs/task-generation.log</code></td>
+</tr>
+<tr>
+<td><code>/etc/logrotate.d/httpd</code></td>
+<td><code>/var/log/httpd/access_log</code>, <code>/var/log/httpd/error_log</code></td>
+</tr>
+<tr>
+<td><code>/etc/logrotate.d/mysql</code></td>
+<td><code>/var/log/mysqld.log</code>, <code>/var/log/mysql.log</code>, <code>/var/lib/mysql/log_slow_query.log</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="implementation-of-tomcat-log-rotation">Implementation of Tomcat Log Rotation</h2>
+<h3 id="prerequisite---disable-internal-tomcat-log-rotation-process">Prerequisite - Disable internal Tomcat log rotation process</h3>
+<p>As a prerequisite before configuring logrotate for the Tomcat-related log files, it is necessary to disable Tomcat&rsquo;s internal log rotation process to avoid any conflicts with logrotate. To do this, update the following configuration files on the Tomcat virtual machines.</p>
+<ul>
+<li><strong>File:</strong> <code>/opt/tomcat/conf/logging.properties</code></li>
+<li><strong>File:</strong> <code>/opt/tomcat/conf/server.xml</code></li>
+</ul>
+<h4 id="edit-opttomcatconfloggingproperties-configuration-file">Edit <code>/opt/tomcat/conf/logging.properties</code> configuration file</h4>
+<ul>
+<li>Set <code>maxDays</code> to <code>-1</code>. This allows log entries to be continuously written to a single log file without a retention period as specified in the documentation.</li>
+<li>Set the <code>rotatable</code> parameter to <code>false</code>. This enables external tools such as logrotate to manage the log rotation cycle.</li>
+<li>Comment out the manager and host-manager logs as they are no longer needed.</li>
+</ul>
+<p>Apply the changes in the <code>logging.properties</code> file accordingly as shown below:</p>
+<pre tabindex="0"><code class="language-properties" data-lang="properties">1catalina.org.apache.juli.AsyncFileHandler.level = FINE
+1catalina.org.apache.juli.AsyncFileHandler.directory = ${catalina.base}/logs
+1catalina.org.apache.juli.AsyncFileHandler.prefix = catalina.
+# Retain log file (no deletion) on the server file system, and disable internal Tomcat log rotation,
+# as log rotation and cleanup are managed externally by logrotate.
+1catalina.org.apache.juli.AsyncFileHandler.maxDays = -1
+1catalina.org.apache.juli.AsyncFileHandler.rotatable = false
+1catalina.org.apache.juli.AsyncFileHandler.encoding = UTF-8
+
+2localhost.org.apache.juli.AsyncFileHandler.level = FINE
+2localhost.org.apache.juli.AsyncFileHandler.directory = ${catalina.base}/logs
+2localhost.org.apache.juli.AsyncFileHandler.prefix = localhost.
+# Retain log file (no deletion) on the server file system, and disable internal Tomcat log rotation,
+# as log rotation and cleanup are managed externally by logrotate.
+2localhost.org.apache.juli.AsyncFileHandler.maxDays = -1
+2localhost.org.apache.juli.AsyncFileHandler.rotatable = false
+2localhost.org.apache.juli.AsyncFileHandler.encoding = UTF-8
+
+# These logs are no longer required
+#3manager.org.apache.juli.AsyncFileHandler.level = FINE
+#3manager.org.apache.juli.AsyncFileHandler.directory = ${catalina.base}/logs
+#3manager.org.apache.juli.AsyncFileHandler.prefix = manager.
+#3manager.org.apache.juli.AsyncFileHandler.maxDays = -1
+#3manager.org.apache.juli.AsyncFileHandler.rotatable = false
+#3manager.org.apache.juli.AsyncFileHandler.encoding = UTF-8
+
+# These logs are no longer required
+#4host-manager.org.apache.juli.AsyncFileHandler.level = FINE
+#4host-manager.org.apache.juli.AsyncFileHandler.directory = ${catalina.base}/logs
+#4host-manager.org.apache.juli.AsyncFileHandler.prefix = host-manager.
+#4host-manager.org.apache.juli.AsyncFileHandler.maxDays = -1
+#4host-manager.org.apache.juli.AsyncFileHandler.rotatable = false
+#4host-manager.org.apache.juli.AsyncFileHandler.encoding = UTF-8
+
+java.util.logging.ConsoleHandler.level = FINE
+java.util.logging.ConsoleHandler.formatter = org.apache.juli.OneLineFormatter
+java.util.logging.ConsoleHandler.encoding = UTF-8
+
+
+############################################################
+# Facility specific properties.
+# Provides extra control for each logger.
+############################################################
+
+org.apache.catalina.core.ContainerBase.[Catalina].[localhost].level = INFO
+org.apache.catalina.core.ContainerBase.[Catalina].[localhost].handlers = 2localhost.org.apache.juli.AsyncFileHandler
+
+# These logs are no longer required
+#org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/manager].level = INFO
+#org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/manager].handlers = 3manager.org.apache.juli.AsyncFileHandler
+
+# These logs are no longer required
+#org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/host-manager].level = INFO
+#org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/host-manager].handlers = 4host-manager.org.apache.juli.AsyncFileHandler
+</code></pre><p>After making the changes, perform the following steps:</p>
+<ul>
+<li>Restart Tomcat service: <code>systemctl restart tomcat</code></li>
+<li>Check Tomcat service status: sudo <code>systemctl status tomcat</code></li>
+<li>Reboot the VM <code>reboot</code> command.</li>
+</ul>
+<h4 id="delete-unnecessary-archived-logs-in-opttomcatlogsarchived-directory">Delete Unnecessary Archived Logs in <code>/opt/tomcat/logs/archived/</code> directory</h4>
+<p>Logs such as <code>task-debug.YYYY-MM-DD.log</code> and <code>debug.YYYY-MM-DD.2.log</code> are generated for debugging purposes and are not needed. These can be safely removed to free up disk space.
+As a temporary solution, we are using a cron job to remove the contents of this directory. To prevent these logs from being created in the future, their generation and rotation must be disabled at the application level.</p>
+<p>To set up the cron job:</p>
+<ul>
+<li>As the root user, open the crontab editor by running the following command: <code>crontab -e</code></li>
+<li>Add the following line to the crontab file:</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Daily at 12:15 AM remove all contents from &#39;/opt/tomcat/logs/archived&#39; as these logs are not needed.</span>
+<span style="color:#75715e"># Disable log generation and rotation at the application level to prevent future creation.</span>
+<span style="color:#ae81ff">15</span> <span style="color:#ae81ff">0</span> * * <span style="color:#ae81ff">0</span> rm -rf /opt/tomcat/logs/archived/*
+</code></pre></div><h2 id="logrotate-configuration-for-catalinaout-log-files">Logrotate Configuration for <code>catalina.out</code> log files</h2>
+<ol>
+<li>Use SSH to access the Tomcat #01 server as the root user.</li>
+<li>Navigate to the directory by entering <code>cd /etc/logrotate.d</code> in the terminal.</li>
+<li>Copy the existing file <code>tomcat.disabled</code> and rename it to <code>catalina_out</code> using the command:
+<code>cp -a tomcat.disabled catalina_out</code></li>
+</ol>
+<p><strong>Note:</strong> It is crucial to include the -a option in the <code>cp</code> command to ensure that the new file retains the ownership, permissions, and SELinux context of the original file.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">/opt/tomcat/logs/catalina.out 
+<span style="color:#f92672">{</span>
+    su tomcat adminops
+    copytruncate
+    daily                        
+    rotate <span style="color:#ae81ff">7</span>                    
+    compress
+    missingok
+    notifempty
+    dateext
+    dateformat -%Y-%m-%d-%H%M
+    create <span style="color:#ae81ff">770</span> tomcat adminops    
+<span style="color:#f92672">}</span>
+</code></pre></div><ol start="4">
+<li>For testing purposes, you can perform a dry run of the log rotation process to see what would happen without actually rotating the logs: <code>logrotate -vd /etc/logrotate.d/catalina_out</code></li>
+<li>Repeat the previous steps for each additional Tomcat VM to apply the same logrotate configuration.</li>
+</ol>
+<h2 id="logrotate-configuration-for-tomcat-miscellaneous-logs">Logrotate Configuration for Tomcat Miscellaneous Logs</h2>
+<ol>
+<li>Use SSH to access the Tomcat #01 server as the root user.</li>
+<li>Navigate to the directory by entering cd /etc/logrotate.d in the terminal.</li>
+<li>Copy the existing file tomcat.disabled and rename it to catalina_out using the command: <code>cp -a tomcat.disabled tomcat_misc</code></li>
+</ol>
+<p><strong>Note:</strong> It is crucial to include the -a option in the <code>cp</code> command to ensure that the new file retains the ownership, permissions, and SELinux context of the original file.</p>
+<ol start="4">
+<li>Update the file with the following custom configuration</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">/opt/tomcat/logs/catalina.log
+/opt/tomcat/logs/localhost.log
+/opt/tomcat/logs/localhost_access_log.txt
+/opt/tomcat/logs/debug.log
+/opt/tomcat/logs/task-debug.log
+/opt/tomcat/logs/task-generation.log
+<span style="color:#f92672">{</span>
+    copytruncate
+    daily                        
+    rotate <span style="color:#ae81ff">7</span>                    
+    compress
+    missingok
+    notifempty
+    su tomcat tomcat
+    create <span style="color:#ae81ff">640</span> tomcat tomcat
+    sharedscripts
+    postrotate
+        /bin/systemctl reload tomcat.service &gt; /dev/null 2&gt;/dev/null <span style="color:#f92672">||</span> true
+    endscript
+<span style="color:#f92672">}</span>
+</code></pre></div><ol start="5">
+<li>For testing purposes, you can perform a dry run of the log rotation process to see what would happen without actually rotating the logs: <code>logrotate -vd /etc/logrotate.d/tomcat_misc</code></li>
+<li>Repeat the previous steps for each additional Tomcat VM to apply the same logrotate configuration.</li>
+</ol>
+<h2 id="logrotate-configuration-for-httpd-log-files">Logrotate Configuration for <code>httpd</code> log files</h2>
+<ol>
+<li>Use SSH to access the Tomcat #01 server as the root user.</li>
+<li>Navigate to the directory by entering <code>cd /etc/logrotate.d</code> in the terminal.</li>
+<li>Copy the existing file <code>tomcat.disabled</code> and rename it to <code>catalina_out</code> using the command:
+<code>cp -a tomcat.disabled catalina_out</code></li>
+</ol>
+<p><strong>Note:</strong> It is crucial to include the -a option in the <code>cp</code> command to ensure that the new file retains the ownership, permissions, and SELinux context of the original file.</p>
+<ol start="4">
+<li>Update the file with the following custom configuration</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">/var/log/httpd/access_log 
+/var/log/httpd/error_log 
+<span style="color:#f92672">{</span>
+    su root adminops
+    daily
+    rotate <span style="color:#ae81ff">7</span>
+    compress
+    missingok
+    notifempty
+    create <span style="color:#ae81ff">770</span> root adminops
+    sharedscripts
+    postrotate
+        /bin/systemctl reload httpd.service &gt; /dev/null 2&gt;/dev/null <span style="color:#f92672">||</span> true
+    endscript
+<span style="color:#f92672">}</span>
+</code></pre></div><ol start="5">
+<li>For testing purposes, you can perform a dry run of the log rotation process to see what would happen without actually rotating the logs: <code>logrotate -vd /etc/logrotate.d/httpd</code></li>
+<li>Repeat the previous steps for each additional Tomcat VM to apply the same logrotate configuration.</li>
+</ol>
+<h2 id="logrotate-configuration-for-unison-log-files">Logrotate Configuration for <code>unison</code> log files</h2>
+<ol>
+<li>Use SSH to access the Tomcat #01 server as the root user.</li>
+<li>Navigate to the directory by entering <code>cd /etc/logrotate.d</code> in the terminal.</li>
+<li>Copy the existing file <code>tomcat.disabled</code> and rename it to <code>unison</code> using the command:
+<code>cp -a tomcat.disabled unison</code></li>
+</ol>
+<p><strong>Note:</strong> It is crucial to include the -a option in the <code>cp</code> command to ensure that the new file retains the ownership, permissions, and SELinux context of the original file.</p>
+<ol start="4">
+<li>Update the file with the following custom configuration</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># The &#39;daily&#39; directive is intentionally omitted because it caused issues with the default logrotate daily cron job.</span>
+<span style="color:#75715e"># Instead, logrotate is manually invoked via a custom cron job set to run daily at 12:45 AM.</span>
+<span style="color:#75715e"># Cron job: 45 0 * * * /usr/sbin/logrotate /etc/logrotate.d/unison</span>
+<span style="color:#75715e"># This ensures that unison logs are rotated daily without conflicts.</span>
+
+/root/unison.log 
+<span style="color:#f92672">{</span>
+    rotate <span style="color:#ae81ff">7</span>
+    copytruncate
+    compress
+    dateext
+    dateformat -%Y-%m-%d-%H%M
+    missingok
+    notifempty
+    create <span style="color:#ae81ff">600</span> root root
+<span style="color:#f92672">}</span>
+</code></pre></div><h3 id="changing-the-selinux-context-for-rootunisonlog">Changing the SELinux Context for <code>/root/unison.log</code></h3>
+<p>The following steps outline a workaround for the issue where logrotate cannot rotate <code>unison.log</code> due to SELinux permissions, as the file is initially located under the <code>/root</code> directory. As the root user, change the SELinux context type for the <code>/root/unison.log</code> file from <code>admin_home_t</code> to <code>var_log_t</code> using the following commands:</p>
+<ul>
+<li>Check the current SELinux context: <code>ls -Z /root/unison.log</code></li>
+<li>Set the new SELinux context: <code>semanage fcontext -a -t var_log_t &quot;/root/unison.log&quot;</code></li>
+<li>Apply the context change: <code>restorecon -v /root/unison.log</code></li>
+<li>Verify the new SELinux context has been applied: <code>ls -Z /root/unison.log</code></li>
+<li>Output expected: <code>system_u:object_r:logrotate_var_log_t:s0 /root/unison.log</code></li>
+</ul>
+<h3 id="custom-cron-job-for-unisonlog">Custom cron job for <code>unison.log</code></h3>
+<p>Due to an issue with the <code>daily</code> directive in logrotate not working as expected, we need to set up a custom cron job to manually run logrotate for Unison logs.
+Follow these steps to create the cron job:</p>
+<ul>
+<li>As the root user, open the crontab editor by running the following command: <code>crontab -e</code></li>
+<li>Add the following line to the crontab file to manually run logrotate for Unison logs daily at 12:30 AM:</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Manually run logrotate for unison logs daily at 12:45 AM as a workaround, since the &#39;daily&#39; directive in logrotate was not working for some reason.</span>
+
+<span style="color:#ae81ff">30</span> <span style="color:#ae81ff">0</span> * * * /usr/sbin/logrotate /etc/logrotate.d/unison
+</code></pre></div><ul>
+<li>Save and close the crontab file.</li>
+<li>Repeat the previous steps for each additional Tomcat VM to apply the same logrotate configuration. However, schedule the daily crontab on the other Tomcat VMs for 12:45 AM. This timing ensures that the master Unison sync, which runs on the Tomcat 01 VM, completes first, allowing the other VMs to rotate their unison.log files with a slight delay.</li>
+</ul>
+<h2 id="logrotate-configuration-for-mysql-related-log-files">Logrotate Configuration for MySQL-related log files</h2>
+<ol>
+<li>Use SSH to access the Tomcat #01 server as the root user.</li>
+<li>Navigate to the directory by entering <code>cd /etc/logrotate.d</code> in the terminal.</li>
+<li>Open the file named mysql for editing (e.g., vim or nano).</li>
+</ol>
+<p><strong>Important Note:</strong> We encountered an issue where rotated MySQL log files were not being compressed as expected. To resolve this, the MySQL logrotate configuration file was updated with additional directives. The key directives added are the following:</p>
+<ul>
+<li>delaycompress</li>
+<li>dateext</li>
+<li>dateformat -%Y-%m-%d-%H%M</li>
+</ul>
+<p><strong>Outcome:</strong> These updates have successfully addressed the compression issue with rotated log files.</p>
+<ol start="4">
+<li>Update the file with the following configuration:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># The log file name and location can be set in</span>
+<span style="color:#75715e"># /etc/my.cnf by setting the &#34;log-error&#34; option</span>
+<span style="color:#75715e"># in [mysqld]  section as follows:</span>
+<span style="color:#75715e">#</span>
+<span style="color:#75715e"># [mysqld]</span>
+<span style="color:#75715e"># log-error=/var/log/mysqld.log</span>
+<span style="color:#75715e">#</span>
+<span style="color:#75715e"># For the mysqladmin commands below to work, root account</span>
+<span style="color:#75715e"># password is required. Use mysql_config_editor(1) to store</span>
+<span style="color:#75715e"># authentication credentials in the encrypted login path file</span>
+<span style="color:#75715e"># ~/.mylogin.cnf</span>
+<span style="color:#75715e">#</span>
+<span style="color:#75715e"># Example usage:</span>
+<span style="color:#75715e">#</span>
+<span style="color:#75715e">#  mysql_config_editor set --login-path=client --user=root --host=localhost --password</span>
+<span style="color:#75715e">#</span>
+<span style="color:#75715e"># When these actions has been done, un-comment the following to</span>
+<span style="color:#75715e"># enable rotation of mysqld&#39;s log error.</span>
+<span style="color:#75715e">#</span>
+
+/var/log/mysqld.log
+/var/log/mysql.log
+/var/lib/mysql/log_slow_query.log
+<span style="color:#f92672">{</span>
+        daily
+        rotate <span style="color:#ae81ff">5</span>
+        copytruncate
+        compress
+        delaycompress
+        dateext
+        dateformat -%Y-%m-%d-%H%M
+        missingok
+        notifempty
+        create <span style="color:#ae81ff">640</span> mysql mysql
+    postrotate
+       <span style="color:#75715e"># just if mysqld is really running</span>
+       <span style="color:#66d9ef">if</span> test -x /usr/bin/mysqladmin <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>          /usr/bin/mysqladmin --login-path<span style="color:#f92672">=</span>logrotate ping &amp;&gt;/dev/null
+       <span style="color:#66d9ef">then</span>
+          /usr/bin/mysqladmin --login-path<span style="color:#f92672">=</span>logrotate flush-logs
+       <span style="color:#66d9ef">fi</span>
+    endscript
+<span style="color:#f92672">}</span>
+</code></pre></div><h3 id="configuring-mysql-authentication-for-log-rotation">Configuring MySQL Authentication for Log Rotation</h3>
+<ol>
+<li>Set up a secure login path to store the root user credentials:
+<code>mysql_config_editor set --login-path=logrotate --user=root --host=localhost --password</code></li>
+<li>Enter the root password when prompted. This command stores the credentials securely and avoids using plain text passwords in scripts.</li>
+<li>Verify the stored login paths: <code>mysql_config_editor print --all</code></li>
+<li>Check the current permissions of the <code>~/.mylogin.cnf file</code>: <code>ls -l ~/.mylogin.cnf</code></li>
+<li>If the permissions are not set to <code>-rw-------</code>, update them to ensure that only the file owner can read and write to it: <code>chmod 600 ~/.mylogin.cnf</code></li>
+<li>Repeat the previous steps for each additional MySQL DB VM to apply the same log rotation configuration.</li>
+</ol>
+<h2 id="logrotate-troubleshooting-and-best-practices">Logrotate Troubleshooting and Best Practices</h2>
+<h3 id="resources-for-logrotate">Resources for Logrotate</h3>
+<ul>
+<li>Linux Shell Terminal: man logrotate</li>
+<li>Online Ressource: <a href="https://linux.die.net/man/8/logrotate">https://linux.die.net/man/8/logrotate</a></li>
+</ul>
+<h3 id="maintain-root-ownership-for-logrotate-configuration-files">Maintain Root Ownership for Logrotate Configuration Files</h3>
+<p>The logrotate configuration files should have permissions set to 644 and ownership set to root, which are the default settings. Additionally, the SELinux context type should be system_u:object_r:etc_t. When creating a new custom logrotate file, it is advisable to use cp -a &lt;existing_logrotate_conf&gt; &lt;custom_new_logrotate_config&gt; to ensure that the permissions, ownership, and SELinux settings are preserved.</p>
+<h3 id="verify-ownership-permission-and-selinux-settings-of-log-files">Verify Ownership, Permission, and SELinux settings of log files</h3>
+<ul>
+<li>
+<p>Use the <code>ls -l</code> command to ensure that the ownership and permissions of the log files specified in the logrotate configuration file (e.g., etc/logrotate.d/&lt;config_file&gt;) match the settings provided in the logrotate configuration. For example: <code>create 640 mysql mysql</code></p>
+</li>
+<li>
+<p>Use <code>ls-Z</code> to display the SELinux (Security-Enhanced Linux) security context of files and directories.</p>
+</li>
+</ul>
+<h3 id="understanding-the-su-directive-with-specific-create-settings">Understanding the ‘su’ Directive with Specific ‘create’ Settings</h3>
+<p>When logrotate is configured with <code>create 770 root adminops</code>, it sets new log files to 770 permissions, accessible only by the owner and group (root and adminops), and restricts access for others. Include the su directive (su root adminops) in the logrotate configuration to enforce this ownership.</p>
+<h3 id="run-manual-test">Run Manual Test</h3>
+<p>Perform a manual test by executing the following command as root user:
+<code>logrotate -vf /etc/logrotate.d/&lt;config_file&gt;</code>
+Note: Ensure that the original log file contains log entries, as an empty log file will not be rotated.</p>
+<h3 id="debug-mode">Debug Mode</h3>
+<p>This mode is purely for verifying what logrotate would do under normal operational conditions. If you want to see logrotate performing the operations without making changes, run the following:  <code>logrotate --debug /etc/logrotate.d/&lt;config_file&gt;</code></p>
+<h3 id="last-log-rotation-timestamps-by-logrotate">Last Log Rotation Timestamps by Logrotate</h3>
+<p><code>cat /var/lib/logrotate/logrotate.status</code></p>
+<h3 id="compression-issue">Compression Issue</h3>
+<p>If the first rotated file is not being compressed, ensure that both the compress and copytruncate directives are declared in the logrotate configuration file.</p>
+<h3 id="verify-full-file-paths">Verify Full File Paths</h3>
+<p>Double-check that the full file paths of the log files are correctly declared in the logrotate configuration file. If uncertain, navigate to the directory containing the log files and run the command <code>pwd</code> to confirm.</p>
+<h3 id="check-for-typos">Check for Typos</h3>
+<p>Review the logrotate configuration file for any typographical errors that may be causing issues.</p>
+<h3 id="curly-braces-and-comments">Curly Braces and Comments</h3>
+<p>Review the logrotate configuration file for any typographical errors that may be causing issues.</p>
+
+    </div>
+    
+    <hr>
+    <div class="post-footer">
+      
+    </div>
+    <footer>
+    <p>If you found this post valuable or have some feedback to share, connect with me on <a href="https://www.linkedin.com/in/yourprofile">LinkedIn</a> or email me at <a href="mailto:mickael.asghar@gmail.com">mickael.asghar@gmail.com</a>.</p>
+</footer>
+ 
+  </article>
+
+    </main>
+  </body>
+</html>

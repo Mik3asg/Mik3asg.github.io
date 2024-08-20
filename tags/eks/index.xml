@@ -14,7 +14,7 @@
       
       <guid>https://Mik3asg.github.io/posts/flask-app-jenkins-cicd-argocd-k8s/</guid>
       <description>Overview This project showcases an end-to-end DevOps pipeline for deploying a basic Flask application using Jenkins Pipeline and GitOps (with ArgoCD) on an Amazon Elastic Kubernetes Service (EKS) cluster. It utilises two Git repositories:
- GitHub Repository for Continous Integration hosting our basic Flask application code GitHub Repository for GitOps and Update of K8s Manifest  Pre-requisites/Assumptions:  AWS Account created AWS CLI installed on local machine IAM user set up with AWS access key ID and AWS secret access key kubectl installed on local machine DockerHub Account created Application code hosted on GIT Repository  Architecture/Design Overview Installation and Setup   Spin up an AWS EC2 instance for a Jenkins server:</description>
+ GitHub Repository for Continous Integration hosting our basic Flask application code GitHub Repository for GitOps and Update of K8s Manifest  Pre-requisites/Assumptions:  AWS Account created AWS CLI installed on local machine IAM user set up with AWS access key ID and AWS secret access key kubectl installed on local machine DockerHub Account created Application code hosted on GIT Repository  Architecture/Design Overview Installation and Setup 1.</description>
     </item>
     
   </channel>
