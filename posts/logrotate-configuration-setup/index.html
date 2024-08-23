@@ -427,7 +427,7 @@ As a temporary solution, we are using a cron job to remove the contents of this 
 <li>Set the new SELinux context: <code>semanage fcontext -a -t var_log_t &quot;/root/unison.log&quot;</code></li>
 <li>Apply the context change: <code>restorecon -v /root/unison.log</code></li>
 <li>Verify the new SELinux context has been applied: <code>ls -Z /root/unison.log</code></li>
-<li>Output expected: <code>system_u:object_r:logrotate_var_log_t:s0 /root/unison.log</code></li>
+<li>Output expected: <code>system_u:object_r:var_log_t:s0 /root/unison.log</code></li>
 </ul>
 <h3 id="custom-cron-job-for-unisonlog">Custom cron job for <code>unison.log</code></h3>
 <p>Due to an issue with the <code>daily</code> directive in logrotate not working as expected, we need to set up a custom cron job to manually run logrotate for Unison logs.
@@ -555,7 +555,7 @@ Note: Ensure that the original log file contains log entries, as an empty log fi
       
     </div>
     <footer>
-    <p>If you found this post valuable or have some feedback to share, connect with me on <a href="https://www.linkedin.com/in/yourprofile">LinkedIn</a> or email me at <a href="mailto:mickael.asghar@gmail.com">mickael.asghar@gmail.com</a>.</p>
+    <p>If you found this post valuable or have some feedback to share, connect with me on <a href="https://www.linkedin.com/in/m-asghar/">LinkedIn</a> or email me at <a href="mailto:mickael.asghar@gmail.com">mickael.asghar@gmail.com</a>.</p>
 </footer>
  
   </article>

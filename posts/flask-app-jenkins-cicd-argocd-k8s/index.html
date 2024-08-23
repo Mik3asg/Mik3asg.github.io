@@ -186,7 +186,8 @@ sudo systemctl restart docker
 </ul>
 <h3 id="2-configure-jenkins">2. Configure Jenkins</h3>
 <ul>
-<li>Install the necessary plugins by navigating to <code>Manage Jenkins &gt; Plugins &gt; Available Plugins</code>. Choose <code>Docker</code>, <code>Docker Pipeline</code> and <code>GitHub integration</code></li>
+<li>Install the necessary plugins by navigating to <code>Manage Jenkins &gt; Plugins &gt; Available Plugins</code></li>
+<li>Choose <code>Docker</code>, <code>Docker Pipeline</code> and <code>GitHub integration</code></li>
 <li>Restart Jenkins server</li>
 <li>Configure Credentials: <code>Manage Jenkins &gt; Credentials &gt; Global &gt; Add Credentials</code>
 <ul>
@@ -203,7 +204,7 @@ sudo systemctl restart docker
 <li>Build Triggers=<code>GitHub hook trigger for GITScm polling</code></li>
 <li>Navigate to the GitHub repository settings and enable the Webhook by following these steps:
 <ul>
-<li><code>Settings &gt; Webhook &gt; Payload URL = http://jenkins_server_public_ip:8080/github-weebhook/</code>)</li>
+<li><code>Settings &gt; Webhook &gt; Payload URL=http://jenkins_server_public_ip:8080/github-weebhook/</code>)</li>
 <li><code>Content type=application/json</code>.</li>
 <li>Confirm Add webhook</li>
 </ul>
@@ -211,7 +212,7 @@ sudo systemctl restart docker
 <li>Pipeline Definition=<code>Pipeline script from SCM</code>
 <ul>
 <li>SCM=<code>GIT</code></li>
-<li>Script Path = <code>Jenkinsfile</code></li>
+<li>Script Path=<code>Jenkinsfile</code></li>
 <li>Repository URL=<code>https://github.com/Mik3asg/Flask_App_Jenkins_CI_EKS.git</code></li>
 <li>Credentials=<code>none</code></li>
 <li>Branch Specifier=<code>*/main</code></li>
@@ -322,7 +323,7 @@ sudo systemctl restart docker
       
     </div>
     <footer>
-    <p>If you found this post valuable or have some feedback to share, connect with me on <a href="https://www.linkedin.com/in/yourprofile">LinkedIn</a> or email me at <a href="mailto:mickael.asghar@gmail.com">mickael.asghar@gmail.com</a>.</p>
+    <p>If you found this post valuable or have some feedback to share, connect with me on <a href="https://www.linkedin.com/in/m-asghar/">LinkedIn</a> or email me at <a href="mailto:mickael.asghar@gmail.com">mickael.asghar@gmail.com</a>.</p>
 </footer>
  
   </article>
