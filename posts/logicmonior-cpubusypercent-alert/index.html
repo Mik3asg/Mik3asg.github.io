@@ -99,8 +99,8 @@ Analysis: The initial investigation revealed that the CPUBusyPercent alert setti
 <p><img src="/LM_01.PNG" alt="CPUBusyPercent Alert Not Triggered"></p>
 <p><em>Figure 1: CPU usage plateau at 100% for 6 minutes without triggering an alert.</em></p>
 <h2 id="analysis">Analysis:</h2>
-<p>The initial investigation revealed that the CPUBusyPercent alert settings were configured to trigger an alert after five consecutive polls (which equates to 6 minutes of sustained high CPU usage). In this case, the CPU usage plateaued at 100% for exactly 6 minutes (from 9:00 to 9:07 AM), barely meeting the alert trigger criteria. However, the alert was not active long enough to be sent out due to the immediate clear interval once the CPU usage dipped below the threshold.</p>
-<p>Upon further inspection, it was noted that the alert was indeed generated briefly at 09:07 AM, but because the CPU usage dropped shortly after, the alert was cleared immediately, and no notification was dispatched. This indicated that the default settings were not optimal for capturing such brief spikes in CPU usage.</p>
+<p>The initial investigation revealed that the <code>CPUBusyPercent</code> alert settings were configured to trigger an alert after five consecutive polls (which equates to 6 minutes of sustained high CPU usage). In this case, the CPU usage plateaued at 100% for exactly 6 minutes (from 9:02 to 9:08 AM), barely meeting the alert trigger criteria. However, the alert was not active long enough to be sent out due to the immediate clear interval once the CPU usage dipped below the threshold.</p>
+<p>Upon further inspection, it was noted that the alert was indeed generated briefly at 09:08 AM, but because the CPU usage dropped shortly after, the alert was cleared immediately, and no notification was dispatched. This indicated that the default settings were not optimal for capturing such brief spikes in CPU usage.</p>
 <p><img src="/LM_02.PNG" alt="CPUBusyPercent metric Alert Tuning"></p>
 <p><em>Figure 2: Previous LogicMonitor settings for CPUBusyPercent alerts.</em></p>
 <h2 id="solution-provided">Solution Provided:</h2>
