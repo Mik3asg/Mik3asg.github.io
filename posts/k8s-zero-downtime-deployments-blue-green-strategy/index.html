@@ -77,7 +77,7 @@ apiVersion: apps/v1 kind: Deployment metadata: name: blue-deploy labels: app: my
   <title>clock</title>
   <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
 </svg>
-          4 min read
+          5 min read
         </div>
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag">
@@ -127,11 +127,11 @@ apiVersion: apps/v1 kind: Deployment metadata: name: blue-deploy labels: app: my
 </code></pre></div><h3 id="deploy-the-blue-environment">Deploy the blue environment:</h3>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl apply -f blue-deployment.yaml
 </code></pre></div><h3 id="check-the-deployment-status">Check the deployment status:</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl get deploy<span style="color:#e6db74">``</span> and <span style="color:#e6db74">``</span>kubectl get pods -l env<span style="color:#f92672">=</span>blue
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl get deploy
+kubectl get pods -l env<span style="color:#f92672">=</span>blue
 </code></pre></div><p><img src="/blue-deployment.PNG" alt="blue-deployment"></p>
-<p><em>Figure 1: Output of the kubectl commands ran above</em></p>
 <h2 id="exposing-the-blue-deployment">Exposing the Blue Deployment</h2>
-<p>The blue-green-service.yaml is responsible for routing traffic to our blue pods using a LoadBalancer Service. The traffic routing occurs because the selector values in blue-deployment.yaml (i.e., <code>spec:selector:matchLabels</code>) match the selector values defined in the blue-green-service.yaml (i.e., <code>spec:selector</code>).</p>
+<p>The blue-green-service.yaml is responsible for routing traffic to our blue pods using a LoadBalancer Service. The traffic routing occurs because the selector values in blue-deployment.yaml (<code>spec:selector:matchLabels</code>) match the selector values defined in the blue-green-service.yaml (<code>spec:selector</code>).</p>
 <p>This is how Kubernetes ensures that traffic is directed to the correct set of pods (in this case, the blue pods running version 1.0). Here&rsquo;s the service manifest:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
 <span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
@@ -161,8 +161,7 @@ apiVersion: apps/v1 kind: Deployment metadata: name: blue-deploy labels: app: my
 </code></pre></div><h3 id="check-the-service-and-confirm-traffic-routing">Check the service and confirm traffic routing:</h3>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl get svc
 curl http://&lt;EXTERNAL_IP&gt;
-</code></pre></div><p><img src="/blue-green-service-deployment-yaml.PNG" alt="blue-green-service-deployment-yaml">
-<img src="/curl-blue-service.PNG" alt="curl-blue-service.PNG"></p>
+</code></pre></div><p><img src="/curl-blue-service.PNG" alt="curl-blue-service.PNG"></p>
 <h2 id="deploy-the-green-environment">Deploy the Green Environment</h2>
 <p>At this stage, we will deploy the new version of the application (v2.0) by defining a new deployment manifest green-deployment.yaml. The green environment will be deployed alongside the blue environment, but traffic will still be routed to the blue pods until we update the service to point to the green ones.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
@@ -178,7 +177,7 @@ curl http://&lt;EXTERNAL_IP&gt;
   <span style="color:#f92672">selector</span>:
     <span style="color:#f92672">matchLabels</span>:
       <span style="color:#f92672">app</span>: <span style="color:#ae81ff">my-node-app</span>
-      <span style="color:#f92672">env</span>: <span style="color:#ae81ff">green</span>
+      <span style="color:#f92672">env</span>: <span style="color:#ae81ff">green </span>
   <span style="color:#f92672">template</span>:
     <span style="color:#f92672">metadata</span>:
       <span style="color:#f92672">labels</span>:
@@ -193,8 +192,8 @@ curl http://&lt;EXTERNAL_IP&gt;
         - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">3000</span>
 </code></pre></div><p>Here:</p>
 <ul>
-<li>The labels applied to the green pods (<code>app:my-node-app</code>, <code>env:green</code>, <code>version: v2.0</code>) differentiate them from the blue pods running the older version.</li>
-<li>The selector in this deployment (<code>app:my-node-app</code>, <code>env: green</code>) will manage these green pods, ensuring Kubernetes knows which pods belong to this new environment.</li>
+<li>The labels applied to the green pods (<code>app:my-node-app</code>, <code>env:green</code>, <code>version:v2.0</code>) differentiate them from the blue pods running the older version.</li>
+<li>The selector in this deployment (<code>app:my-node-app</code>, <code>env:green</code>) will manage these green pods, ensuring Kubernetes knows which pods belong to this new environment.</li>
 </ul>
 <h3 id="deploy-the-green-environment-1">Deploy the Green Environment</h3>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl apply -f green-deployment.yaml
@@ -211,7 +210,7 @@ curl http://&lt;EXTERNAL_IP&gt;
   <span style="color:#f92672">type</span>: <span style="color:#ae81ff">LoadBalancer</span>
   <span style="color:#f92672">selector</span>:
     <span style="color:#f92672">app</span>: <span style="color:#ae81ff">my-node-app</span>
-    <span style="color:#f92672">env</span>: <span style="color:#ae81ff">green</span>
+    <span style="color:#f92672">env</span>: <span style="color:#ae81ff">green </span> <span style="color:#75715e"># update from blue to green for migration</span>
   <span style="color:#f92672">ports</span>:
   - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">http</span>
     <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
@@ -219,7 +218,7 @@ curl http://&lt;EXTERNAL_IP&gt;
     <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">3000</span>
 </code></pre></div><ul>
 <li>The selector in the updated blue-green-service.yaml is now set to env: green, meaning the service will route traffic to the green pods (v2.0) instead of the blue ones.</li>
-<li>Since the selector values in the green-deployment.yaml (spec:selector:matchLabels) now match those in the service (spec:selector), all traffic will flow to the green pods.</li>
+<li>Since the selector values in the green-deployment.yaml (<code>spec:selector:matchLabels</code>) now match those in the service (<code>spec:selector</code>), all traffic will flow to the green pods.</li>
 </ul>
 <h3 id="apply-the-updated-service-configuration">Apply the updated service configuration:</h3>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl apply -f blue-green-service.yaml
@@ -227,8 +226,40 @@ curl http://&lt;EXTERNAL_IP&gt;
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl get svc
 curl http://&lt;EXTERNAL_IP&gt;
 </code></pre></div><p><img src="/curl-blue-service.PNG" alt="curl-blue-service.PNG"></p>
-<h2 id="conclusion">Conclusion</h2>
-<p>At this point, the service has successfully re-routed traffic to the green pods, running version 2.0 of the application, without any downtime. The blue pods can now be scaled down or removed once you’re confident in the green deployment&rsquo;s stability.</p>
+<h2 id="rolling-back-to-the-blue-environment">Rolling Back to the Blue Environment</h2>
+<p>In a blue-green deployment, rolling back is straightforward because both environments (blue and green) are running simultaneously. If any issues are found in the green deployment (v2.0), you can quickly revert traffic back to the stable blue environment (v1.0) by updating the service selector.</p>
+<p>To roll back traffic from the green pods (v2.0) to the blue pods (v1.0), we need to update the blue-green-service.yaml again. By changing the service’s selector back to env: blue, we ensure that the LoadBalancer routes traffic to the blue pods.</p>
+<p>Here&rsquo;s how to update the service for rollback:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">blue-green-svc</span>
+<span style="color:#f92672">spec</span>:
+  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">LoadBalancer</span>
+  <span style="color:#f92672">selector</span>:
+    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">my-node-app</span>
+    <span style="color:#f92672">env: blue  # Rollback update</span>: <span style="color:#ae81ff">route traffic back to blue (v1.0)</span>
+  <span style="color:#f92672">ports</span>:
+  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">http</span>
+    <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+    <span style="color:#f92672">port</span>: <span style="color:#ae81ff">80</span>
+    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">3000</span>
+</code></pre></div><p>In this manifest:</p>
+<ul>
+<li>The selector has been changed back to env: blue (as indicated in the comment), which matches the labels of the blue pods (v1.0).</li>
+<li>This change re-routes all traffic back to the blue environment, restoring the previous stable version of the application.
+To perform the rollback, apply the updated service configuration:</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl apply -f blue-green-service.yaml
+</code></pre></div><h3 id="verify-that-the-service-is-now-routing-traffic-to-the-blue-pods">Verify that the service is now routing traffic to the blue pods:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl get svc
+curl http://&lt;EXTERNAL_IP&gt;
+</code></pre></div><h1 id="conclusion">Conclusion</h1>
+<p>Blue-green deployments in Kubernetes allow for zero-downtime updates by running both the old (blue) and new (green) versions of an application in parallel. This strategy ensures that traffic can be seamlessly switched between versions by simply updating the service’s selector. In case of issues with the new version, rolling back to the stable version is quick and risk-free.</p>
+<h2 id="why-rollback-is-efficient-in-blue-green-deployments">Why Rollback is Efficient in Blue-Green Deployments</h2>
+<p>Immediate Recovery: Since the blue environment is always running, traffic can be quickly redirected back without needing to redeploy the stable version.
+Minimal Risk: Rolling back is as simple as updating the service selector, with no need to terminate the green pods or affect user traffic.
+This approach provides flexibility, reduces risk, and ensures a smooth deployment process, making it ideal for production environments where uptime is critical.</p>
 
     </div>
     
