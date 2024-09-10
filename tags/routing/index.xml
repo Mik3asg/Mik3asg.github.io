@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Routing on Mickael Asghar</title>
+    <link>https://Mik3asg.github.io/tags/routing/</link>
+    <description>Recent content in Routing on Mickael Asghar</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 09 Sep 2024 16:49:36 +0100</lastBuildDate><atom:link href="https://Mik3asg.github.io/tags/routing/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Kubernetes - Zero Downtime Deployments: Blue/Green Strategy</title>
+      <link>https://Mik3asg.github.io/posts/k8s-zero-downtime-deployments-blue-green-strategy/</link>
+      <pubDate>Mon, 09 Sep 2024 16:49:36 +0100</pubDate>
+      
+      <guid>https://Mik3asg.github.io/posts/k8s-zero-downtime-deployments-blue-green-strategy/</guid>
+      <description>Overview In this guide, I&amp;rsquo;ll demonstrate a blue-green deployment strategy in Kubernetes using Deployments and Services. The goal is to achieve zero downtime by running two sets of pods: the current version (v1.0, blue) and the new version (v2.0, green). I&amp;rsquo;ll also explain how to roll back from green to blue if necessary.
+Setup Environments Blue Environment The blue-deployment.yaml defines the current environment running version 1.0 of the app.
+apiVersion: apps/v1 kind: Deployment metadata: name: blue-deploy labels: app: my-node-app env: blue version: v1.</description>
+    </item>
+    
+  </channel>
+</rss>

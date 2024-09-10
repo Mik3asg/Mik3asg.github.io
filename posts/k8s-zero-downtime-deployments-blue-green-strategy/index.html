@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Kubernetes - Zero Downtime Deployments: Blue/Green Strategy // Mickael Asghar</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.92.2" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Mickael Asghar" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.d2eb6bbc251bcca91087898d589e1227cdc54d7c9080e0ae47b4490a9b225a71.css" />
+    
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Kubernetes - Zero Downtime Deployments: Blue/Green Strategy"/>
+<meta name="twitter:description" content="Overview In this guide, I&rsquo;ll demonstrate a blue-green deployment strategy in Kubernetes using Deployments and Services. The goal is to achieve zero downtime by running two sets of pods: the current version (v1.0, blue) and the new version (v2.0, green). I&rsquo;ll also explain how to roll back from green to blue if necessary.
+Setup Environments Blue Environment The blue-deployment.yaml defines the current environment running version 1.0 of the app.
+apiVersion: apps/v1 kind: Deployment metadata: name: blue-deploy labels: app: my-node-app env: blue version: v1."/>
+
+    <meta property="og:title" content="Kubernetes - Zero Downtime Deployments: Blue/Green Strategy" />
+<meta property="og:description" content="Overview In this guide, I&rsquo;ll demonstrate a blue-green deployment strategy in Kubernetes using Deployments and Services. The goal is to achieve zero downtime by running two sets of pods: the current version (v1.0, blue) and the new version (v2.0, green). I&rsquo;ll also explain how to roll back from green to blue if necessary.
+Setup Environments Blue Environment The blue-deployment.yaml defines the current environment running version 1.0 of the app.
+apiVersion: apps/v1 kind: Deployment metadata: name: blue-deploy labels: app: my-node-app env: blue version: v1." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Mik3asg.github.io/posts/k8s-zero-downtime-deployments-blue-green-strategy/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-09-09T16:49:36+01:00" />
+<meta property="article:modified_time" content="2024-09-09T16:49:36+01:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://Mik3asg.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="Mickael Asghar" /></a>
+      <span class="app-header-title">Mickael Asghar</span>
+      <nav class="app-header-menu">
+          <a class="app-header-menu-item" href="/">Home</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/tags/">Tags</a>
+      </nav>
+      <p>Welcome to SystemsGo.live – my blog where I share my experiences and insights in cloud-native technologies, DevOps practices, IT automation, and various IT topics.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/mik3asg" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+          <a href="https://www.linkedin.com/in/m-asghar/" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-linkedin">
+  <title>LinkedIn</title>
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">Kubernetes - Zero Downtime Deployments: Blue/Green Strategy</h1>
+      <div class="post-meta">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Sep 9, 2024
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          4 min read
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag">
+  <title>tag</title>
+  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>
+</svg>
+              <a class="tag" href="https://Mik3asg.github.io/tags/kubernetes/">Kubernetes</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/deployment/">Deployment</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/strategy/">Strategy</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/service/">Service</a>
+              <a class="tag" href="https://Mik3asg.github.io/tags/routing/">Routing</a>
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h1 id="overview">Overview</h1>
+<p>In this guide, I&rsquo;ll demonstrate a blue-green deployment strategy in Kubernetes using Deployments and Services. The goal is to achieve zero downtime by running two sets of pods: the current version (v1.0, blue) and the new version (v2.0, green). I&rsquo;ll also explain how to roll back from green to blue if necessary.</p>
+<h1 id="setup-environments">Setup Environments</h1>
+<h2 id="blue-environment">Blue Environment</h2>
+<p>The blue-deployment.yaml defines the current environment running version 1.0 of the app.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">blue-deploy</span>
+  <span style="color:#f92672">labels</span>:
+    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">my-node-app</span>
+    <span style="color:#f92672">env</span>: <span style="color:#ae81ff">blue</span>
+    <span style="color:#f92672">version</span>: <span style="color:#ae81ff">v1.0</span>
+<span style="color:#f92672">spec</span>:
+  <span style="color:#f92672">replicas</span>: <span style="color:#ae81ff">2</span>
+  <span style="color:#f92672">selector</span>:
+    <span style="color:#f92672">matchLabels</span>:
+      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">my-node-app</span>
+      <span style="color:#f92672">env</span>: <span style="color:#ae81ff">blue</span>
+  <span style="color:#f92672">template</span>:
+    <span style="color:#f92672">metadata</span>:
+      <span style="color:#f92672">labels</span>:
+        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">my-node-app</span>
+        <span style="color:#f92672">env</span>: <span style="color:#ae81ff">blue</span>
+        <span style="color:#f92672">version</span>: <span style="color:#ae81ff">v1.0</span>
+    <span style="color:#f92672">spec</span>:
+      <span style="color:#f92672">containers</span>:
+      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">my-node-app</span>
+        <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mik3asg/k8s-zero-downtime-deployment:v1.0</span>
+        <span style="color:#f92672">ports</span>:
+        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">3000</span>
+</code></pre></div><h3 id="deploy-the-blue-environment">Deploy the blue environment:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl apply -f blue-deployment.yaml
+</code></pre></div><h3 id="check-the-deployment-status">Check the deployment status:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl get deploy<span style="color:#e6db74">``</span> and <span style="color:#e6db74">``</span>kubectl get pods -l env<span style="color:#f92672">=</span>blue
+</code></pre></div><p><img src="/blue-deployment.PNG" alt="blue-deployment"></p>
+<p><em>Figure 1: Output of the kubectl commands ran above</em></p>
+<h2 id="exposing-the-blue-deployment">Exposing the Blue Deployment</h2>
+<p>The blue-green-service.yaml is responsible for routing traffic to our blue pods using a LoadBalancer Service. The traffic routing occurs because the selector values in blue-deployment.yaml (i.e., <code>spec:selector:matchLabels</code>) match the selector values defined in the blue-green-service.yaml (i.e., <code>spec:selector</code>).</p>
+<p>This is how Kubernetes ensures that traffic is directed to the correct set of pods (in this case, the blue pods running version 1.0). Here&rsquo;s the service manifest:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">blue-green-svc</span>
+<span style="color:#f92672">spec</span>:
+  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">LoadBalancer</span>
+  <span style="color:#f92672">selector</span>:
+    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">my-node-app</span>
+    <span style="color:#f92672">env</span>: <span style="color:#ae81ff">blue</span>
+  <span style="color:#f92672">ports</span>:
+  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">http</span>
+    <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+    <span style="color:#f92672">port</span>: <span style="color:#ae81ff">80</span>
+    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">3000</span>
+</code></pre></div><p>In this manifest:</p>
+<ul>
+<li>
+<p>The selector in blue-green-service.yaml specifies that the service should route traffic to pods labeled app: my-node-app and env: blue. This matches the labels set in the blue-deployment.yaml manifest.</p>
+</li>
+<li>
+<p>As a result, all incoming traffic through this LoadBalancer Service will be routed to the blue pods running version 1.0 of the application.</p>
+</li>
+</ul>
+<h3 id="deploy-the-service">Deploy the service:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl apply -f blue-green-service.yaml
+</code></pre></div><h3 id="check-the-service-and-confirm-traffic-routing">Check the service and confirm traffic routing:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl get svc
+curl http://&lt;EXTERNAL_IP&gt;
+</code></pre></div><p><img src="/blue-green-service-deployment-yaml.PNG" alt="blue-green-service-deployment-yaml">
+<img src="/curl-blue-service.PNG" alt="curl-blue-service.PNG"></p>
+<h2 id="deploy-the-green-environment">Deploy the Green Environment</h2>
+<p>At this stage, we will deploy the new version of the application (v2.0) by defining a new deployment manifest green-deployment.yaml. The green environment will be deployed alongside the blue environment, but traffic will still be routed to the blue pods until we update the service to point to the green ones.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">green-deploy</span>
+  <span style="color:#f92672">labels</span>:
+    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">my-node-app</span>
+    <span style="color:#f92672">env</span>: <span style="color:#ae81ff">green</span>
+    <span style="color:#f92672">version</span>: <span style="color:#ae81ff">v2.0</span>
+<span style="color:#f92672">spec</span>:
+  <span style="color:#f92672">replicas</span>: <span style="color:#ae81ff">2</span>
+  <span style="color:#f92672">selector</span>:
+    <span style="color:#f92672">matchLabels</span>:
+      <span style="color:#f92672">app</span>: <span style="color:#ae81ff">my-node-app</span>
+      <span style="color:#f92672">env</span>: <span style="color:#ae81ff">green</span>
+  <span style="color:#f92672">template</span>:
+    <span style="color:#f92672">metadata</span>:
+      <span style="color:#f92672">labels</span>:
+        <span style="color:#f92672">app</span>: <span style="color:#ae81ff">my-node-app</span>
+        <span style="color:#f92672">env</span>: <span style="color:#ae81ff">green</span>
+        <span style="color:#f92672">version</span>: <span style="color:#ae81ff">v2.0</span>
+    <span style="color:#f92672">spec</span>:
+      <span style="color:#f92672">containers</span>:
+      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">my-node-app</span>
+        <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mik3asg/k8s-zero-downtime-deployment:v2.0</span>
+        <span style="color:#f92672">ports</span>:
+        - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">3000</span>
+</code></pre></div><p>Here:</p>
+<ul>
+<li>The labels applied to the green pods (<code>app:my-node-app</code>, <code>env:green</code>, <code>version: v2.0</code>) differentiate them from the blue pods running the older version.</li>
+<li>The selector in this deployment (<code>app:my-node-app</code>, <code>env: green</code>) will manage these green pods, ensuring Kubernetes knows which pods belong to this new environment.</li>
+</ul>
+<h3 id="deploy-the-green-environment-1">Deploy the Green Environment</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl apply -f green-deployment.yaml
+</code></pre></div><p><img src="/blue-green-deploy-pods.PNG" alt="blue-green-deploy-pods"></p>
+<p>At this point, both the blue (v1.0) and green (v2.0) pods are running in parallel, but traffic is still being routed to the blue environment.</p>
+<h2 id="update-the-service-to-re-route-traffic-from-blue-to-green">Update the Service to Re-route traffic from Blue to Green</h2>
+<p>To direct traffic to the green pods (version 2.0), we need to modify the existing service. This involves updating the selector in blue-green-service.yaml to match the labels of the green deployment. By doing so, we switch traffic from the blue environment to the green environment without any downtime.</p>
+<p>Here&rsquo;s the updated service manifest:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">blue-green-svc</span>
+<span style="color:#f92672">spec</span>:
+  <span style="color:#f92672">type</span>: <span style="color:#ae81ff">LoadBalancer</span>
+  <span style="color:#f92672">selector</span>:
+    <span style="color:#f92672">app</span>: <span style="color:#ae81ff">my-node-app</span>
+    <span style="color:#f92672">env</span>: <span style="color:#ae81ff">green</span>
+  <span style="color:#f92672">ports</span>:
+  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">http</span>
+    <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+    <span style="color:#f92672">port</span>: <span style="color:#ae81ff">80</span>
+    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">3000</span>
+</code></pre></div><ul>
+<li>The selector in the updated blue-green-service.yaml is now set to env: green, meaning the service will route traffic to the green pods (v2.0) instead of the blue ones.</li>
+<li>Since the selector values in the green-deployment.yaml (spec:selector:matchLabels) now match those in the service (spec:selector), all traffic will flow to the green pods.</li>
+</ul>
+<h3 id="apply-the-updated-service-configuration">Apply the updated service configuration:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl apply -f blue-green-service.yaml
+</code></pre></div><h3 id="check-the-status-to-confirm-the-traffic-is-routed-to-the-green-environment">Check the status to confirm the traffic is routed to the green environment:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl get svc
+curl http://&lt;EXTERNAL_IP&gt;
+</code></pre></div><p><img src="/curl-blue-service.PNG" alt="curl-blue-service.PNG"></p>
+<h2 id="conclusion">Conclusion</h2>
+<p>At this point, the service has successfully re-routed traffic to the green pods, running version 2.0 of the application, without any downtime. The blue pods can now be scaled down or removed once you’re confident in the green deployment&rsquo;s stability.</p>
+
+    </div>
+    
+    <hr>
+    <div class="post-footer">
+      
+    </div>
+    <footer>
+    <p>If you found this post valuable or have some feedback to share, connect with me on <a href="https://www.linkedin.com/in/m-asghar/">LinkedIn</a> or email me at <a href="mailto:mickael.asghar@gmail.com">mickael.asghar@gmail.com</a>.</p>
+</footer>
+ 
+  </article>
+
+    </main>
+  </body>
+</html>

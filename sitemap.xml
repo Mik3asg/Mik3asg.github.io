@@ -2,6 +2,33 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://Mik3asg.github.io/tags/deployment/</loc>
+    <lastmod>2024-09-09T16:49:36+01:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/tags/kubernetes/</loc>
+    <lastmod>2024-09-09T16:49:36+01:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/posts/k8s-zero-downtime-deployments-blue-green-strategy/</loc>
+    <lastmod>2024-09-09T16:49:36+01:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/</loc>
+    <lastmod>2024-09-09T16:49:36+01:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/posts/</loc>
+    <lastmod>2024-09-09T16:49:36+01:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/tags/routing/</loc>
+    <lastmod>2024-09-09T16:49:36+01:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/tags/service/</loc>
+    <lastmod>2024-09-09T16:49:36+01:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/tags/strategy/</loc>
+    <lastmod>2024-09-09T16:49:36+01:00</lastmod>
+  </url><url>
+    <loc>https://Mik3asg.github.io/tags/</loc>
+    <lastmod>2024-09-09T16:49:36+01:00</lastmod>
+  </url><url>
     <loc>https://Mik3asg.github.io/tags/alert/</loc>
     <lastmod>2024-08-23T22:05:29+01:00</lastmod>
   </url><url>
@@ -14,19 +41,10 @@
     <loc>https://Mik3asg.github.io/tags/metrics/</loc>
     <lastmod>2024-08-23T22:05:29+01:00</lastmod>
   </url><url>
-    <loc>https://Mik3asg.github.io/</loc>
-    <lastmod>2024-08-23T22:05:29+01:00</lastmod>
-  </url><url>
     <loc>https://Mik3asg.github.io/tags/monitoring/</loc>
     <lastmod>2024-08-23T22:05:29+01:00</lastmod>
   </url><url>
     <loc>https://Mik3asg.github.io/tags/mysql/</loc>
-    <lastmod>2024-08-23T22:05:29+01:00</lastmod>
-  </url><url>
-    <loc>https://Mik3asg.github.io/posts/</loc>
-    <lastmod>2024-08-23T22:05:29+01:00</lastmod>
-  </url><url>
-    <loc>https://Mik3asg.github.io/tags/</loc>
     <lastmod>2024-08-23T22:05:29+01:00</lastmod>
   </url><url>
     <loc>https://Mik3asg.github.io/tags/threshold/</loc>
