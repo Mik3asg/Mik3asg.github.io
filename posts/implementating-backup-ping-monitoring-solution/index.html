@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en-us">
   <head>
-    <title>Implementing a Backup Ping Monitoring Solution with a Bash Script for Virtual Machines // Mickael Asghar</title>
+    <title>Dealing with False Ping Alerts in LogicMonitor: Building a Fallback Ping Monitoring Script // Mickael Asghar</title>
     <link rel="shortcut icon" href="/favicon.ico" />
     <meta charset="utf-8" />
     <meta name="generator" content="Hugo 0.92.2" />
@@ -13,13 +13,15 @@
 
     
     <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Implementing a Backup Ping Monitoring Solution with a Bash Script for Virtual Machines"/>
-<meta name="twitter:description" content="Problem Statement On Friday, September 6th at 21:31, we received an alert from LogicMonitor, our cloud monitoring service, indicating that one of our production web app servers (Tomcat#3) was down. Receiving such an alert late on a Friday is never ideal. After SSH-ing into the server, I confirmed it was still operational, pointing to an issue with the monitoring system rather than the VM.
-Analysis A ticket was raised with our IT service provider, who manages our cloud workloads and VMs."/>
+<meta name="twitter:title" content="Dealing with False Ping Alerts in LogicMonitor: Building a Fallback Ping Monitoring Script"/>
+<meta name="twitter:description" content="Problem Statement On Friday, September 6th at 21:31, we received an alert from LogicMonitor indicating one of our production web app servers (Tomcat#3) was down. Upon investigation via SSH, I confirmed the server was operational, suggesting the issue was with the monitoring system rather than the VM.
+Analysis A ticket was raised with our IT service provider, who manages our cloud workloads and VMs. Their investigation revealed:
+ Ping data stopped at 16:09 the same day."/>
 
-    <meta property="og:title" content="Implementing a Backup Ping Monitoring Solution with a Bash Script for Virtual Machines" />
-<meta property="og:description" content="Problem Statement On Friday, September 6th at 21:31, we received an alert from LogicMonitor, our cloud monitoring service, indicating that one of our production web app servers (Tomcat#3) was down. Receiving such an alert late on a Friday is never ideal. After SSH-ing into the server, I confirmed it was still operational, pointing to an issue with the monitoring system rather than the VM.
-Analysis A ticket was raised with our IT service provider, who manages our cloud workloads and VMs." />
+    <meta property="og:title" content="Dealing with False Ping Alerts in LogicMonitor: Building a Fallback Ping Monitoring Script" />
+<meta property="og:description" content="Problem Statement On Friday, September 6th at 21:31, we received an alert from LogicMonitor indicating one of our production web app servers (Tomcat#3) was down. Upon investigation via SSH, I confirmed the server was operational, suggesting the issue was with the monitoring system rather than the VM.
+Analysis A ticket was raised with our IT service provider, who manages our cloud workloads and VMs. Their investigation revealed:
+ Ping data stopped at 16:09 the same day." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://Mik3asg.github.io/posts/implementating-backup-ping-monitoring-solution/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2024-09-10T16:44:01+01:00" />
@@ -61,7 +63,7 @@ Analysis A ticket was raised with our IT service provider, who manages our cloud
       
   <article class="post">
     <header class="post-header">
-      <h1 class ="post-title">Implementing a Backup Ping Monitoring Solution with a Bash Script for Virtual Machines</h1>
+      <h1 class ="post-title">Dealing with False Ping Alerts in LogicMonitor: Building a Fallback Ping Monitoring Script</h1>
       <div class="post-meta">
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
@@ -75,7 +77,7 @@ Analysis A ticket was raised with our IT service provider, who manages our cloud
   <title>clock</title>
   <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
 </svg>
-          6 min read
+          5 min read
         </div>
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag">
@@ -92,7 +94,7 @@ Analysis A ticket was raised with our IT service provider, who manages our cloud
     </header>
     <div class="post-content">
       <h1 id="problem-statement">Problem Statement</h1>
-<p>On Friday, September 6th at 21:31, we received an alert from LogicMonitor, our cloud monitoring service, indicating that one of our production web app servers (Tomcat#3) was down. Receiving such an alert late on a Friday is never ideal. After SSH-ing into the server, I confirmed it was still operational, pointing to an issue with the monitoring system rather than the VM.</p>
+<p>On Friday, September 6th at 21:31, we received an alert from LogicMonitor indicating one of our production web app servers (Tomcat#3) was down. Upon investigation via SSH, I confirmed the server was operational, suggesting the issue was with the monitoring system rather than the VM.</p>
 <h1 id="analysis">Analysis</h1>
 <p>A ticket was raised with our IT service provider, who manages our cloud workloads and VMs. Their investigation revealed:</p>
 <ol>
@@ -100,11 +102,14 @@ Analysis A ticket was raised with our IT service provider, who manages our cloud
 <li>All other metrics reported normally, except for ping.</li>
 <li>Other servers in the same environment (e.g., Tomcat#1) were successfully reporting ping data.</li>
 </ol>
-<p>Their investigation concluded that the LogicMonitor collector responsible for ping monitoring had encountered an issue, causing the false alert. After they resolved the problem, ping monitoring resumed as expected.</p>
-<h1 id="proposed-alternative-backup-ping-monitoring-script">Proposed Alternative: Backup Ping Monitoring Script</h1>
-<p>To avoid relying entirely on third-party services for ping checks, I developed a backup ping monitoring script. Running on a separate VM, it regularly pings target servers and sends email alerts if any fail to respond after multiple attempts. While it lacks advanced metrics or graphs, it provides a simple, effective fallback for basic network connectivity monitoring.</p>
+<p>Despite the alert, the server was fully operational, and no ping data was lost. The issue was traced to a problem with the LogicMonitor collector, which caused the false alert. Once resolved, ping monitoring resumed.</p>
+<h2 id="graph-explanation">Graph Explanation</h2>
+<p>The graph below shows that the ping metrics, including round-trip time and packet counts, were being reported normally up until 16:09 on September 6th. After that, no new ping data was collected, confirming the issue was related to the monitoring service rather than the server itself.</p>
+<p><img src="/ping_data_loss_tomcat_3.PNG" alt="ping-data-loss-tomcat-3"></p>
+<h1 id="proposed-alternative-fallback-ping-monitoring-script">Proposed Alternative: Fallback Ping Monitoring Script</h1>
+<p>To reduce reliance on third-party monitoring services, I created a backup ping monitoring script. Running on a separate VM, it pings target servers and sends email alerts if they don’t respond after several attempts. It’s a simple fallback solution for basic connectivity checks.</p>
 <h2 id="environment-setup">Environment setup:</h2>
-<p>This backup ping monitoring solution was implemented and tested in an AWS environment. The setup included 4 EC2 instances:</p>
+<p>This fallback ping monitoring solution was implemented and tested in an AWS environment. The setup included 3 EC2 instances:</p>
 <ul>
 <li>1 EC2 instance as the <code>ping-monitoring server</code>.</li>
 <li>2 EC2 instance as <code>target hosts</code>.</li>
@@ -114,8 +119,8 @@ Analysis A ticket was raised with our IT service provider, who manages our cloud
 <h3 id="step-1---allow-icmp-through-the-firewall">Step 1 - Allow ICMP Through the Firewall</h3>
 <ul>
 <li><strong>Monitoring Server:</strong> Allow outbound ICMP traffic (ping) for all destinations.</li>
-<li><strong>Target Servers:</strong> Allow inbound ICMP traffic (ping), but restrict it to the monitoring server&rsquo;s IP.</li>
-<li><strong>Test Connectivity</strong>: Use the ping command from the monitoring server to ensure each target server is reachable and ICMP is enabled: <code>ping &lt;target_host_public_IP_address&gt;</code></li>
+<li><strong>Target Servers:</strong> Allow inbound ICMP from the monitoring server’s IP.</li>
+<li><strong>Test Connectivity:</strong> Run ping &lt;target_host_public_IP&gt; from the monitoring server to ensure reachability.</li>
 </ul>
 <h3 id="step-2---install-mailx-package-to-enable-email-notification">Step 2 - Install <code>mailx</code> package to enable email notification</h3>
 <p><code>mailx</code> is a command-line email client used in Unix-like systems to send and receive emails directly from the terminal or within scripts.</p>
@@ -126,13 +131,11 @@ Analysis A ticket was raised with our IT service provider, who manages our cloud
 </ul>
 <h3 id="step-3---gmail-configuration-for-smtp-authentication">Step 3 - Gmail Configuration for SMTP Authentication</h3>
 <p>To ensure that the script can send email notifications using Gmail’s SMTP service, you need to configure Gmail accordingly. Follow these steps:</p>
-<h4 id="enable-app-passwords-for-gmail">Enable App Passwords for Gmail:</h4>
-<p>If you have Two-Step Verification enabled:</p>
-<ul>
-<li>Go to <code>Google Account &gt; Security &gt; Signing in to Google, App Passwords</code></li>
-<li>Type a name in the <code>App name</code> field to create an App Password</li>
-</ul>
-<h4 id="configure-generate-app-password-in-etcmailrc-on-the-monitoring-server">Configure Generate App password in <code>/etc/mail.rc</code> on the Monitoring Server</h4>
+<ol>
+<li>Enable App Passwords in Gmail if Two-Step Verification is on.</li>
+<li>Create an <code>App Password</code> under <code>Google Account &gt; Security &gt; App Passwords</code>.</li>
+<li>Update <code>/etc/mail.rc</code> on the Monitoring server with the following configuration:</li>
+</ol>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">set smtp<span style="color:#f92672">=</span>smtps://smtp.gmail.com:465
 set smtp-auth<span style="color:#f92672">=</span>login
 set smtp-auth-user<span style="color:#f92672">=</span>&lt;your_email_id&gt;@gmail.com            <span style="color:#75715e"># provide the main Gmail address</span>
@@ -166,9 +169,9 @@ cc_recipients<span style="color:#f92672">=(</span><span style="color:#e6db74">&#
 </span><span style="color:#e6db74">
 </span><span style="color:#e6db74"># Associative array of server IP addresses and their hostnames
 </span><span style="color:#e6db74">declare -A ping_targets=(
-</span><span style="color:#e6db74">    [&#34;</span>192.168.1.202<span style="color:#e6db74">&#34;]=&#34;</span>target_host#1<span style="color:#e6db74">&#34;    # adjust IP address and hostname
-</span><span style="color:#e6db74">    [&#34;</span>192.168.1.203<span style="color:#e6db74">&#34;]=&#34;</span>target_host#2<span style="color:#e6db74">&#34;    # adjust IP address and hostname
-</span><span style="color:#e6db74">    [&#34;</span>192.168.1.204<span style="color:#e6db74">&#34;]=&#34;</span>target_host#3<span style="color:#e6db74">&#34;    # adjust IP address and hostname
+</span><span style="color:#e6db74">    [&#34;</span>10.15.30.40<span style="color:#e6db74">&#34;]=&#34;</span>target_host_1<span style="color:#e6db74">&#34;    # adjust IP address and hostname
+</span><span style="color:#e6db74">    [&#34;</span>50.60.70.80<span style="color:#e6db74">&#34;]=&#34;</span>target_host_2<span style="color:#e6db74">&#34;    # adjust IP address and hostname
+</span><span style="color:#e6db74">    [&#34;</span>90.95.100.110<span style="color:#e6db74">&#34;]=&#34;</span>target_host_3<span style="color:#e6db74">&#34;  # adjust IP address and hostname
 </span><span style="color:#e6db74">)
 </span><span style="color:#e6db74">
 </span><span style="color:#e6db74"># Retry settings
@@ -225,27 +228,19 @@ cc_recipients<span style="color:#f92672">=(</span><span style="color:#e6db74">&#
 <li><strong>Adjust values accordingly to meet your requirements</strong>: <code>recipient_email</code>, <code>cc_recipients</code>, <code>target_host_IP</code>, <code>target_hostname</code></li>
 </ul>
 <h3 id="step-5---set-up-the-script-as-a-cron-job">Step 5 - Set up the Script as a Cron Job</h3>
-<p>To make the script run automatically at regular intervals, we set it up as a cron job. In this case, I recommend running the script every 5 minutes, which provides frequent monitoring while avoiding unnecessary load.</p>
+<p>To automate the script, run it as a cron job every 5 minutes:</p>
 <ol>
-<li>Open Crontab:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">crontab -e
-</code></pre></div><ol start="2">
-<li>Add the Cron Job: Add the following line to run the script every 5 minutes:</li>
+<li>Open Crontab as a root: <code>crontab -e</code></li>
+<li>Add the Cron Job:</li>
 </ol>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">*/5 * * * * /path/to/ping-failure-alert.sh
 </code></pre></div><ol start="3">
 <li>Replace <code>/path/to/ping-failure-alert.sh</code> with the actual path to your script.</li>
 </ol>
 <h3 id="avoiding-unnecessary-alerts">Avoiding Unnecessary Alerts</h3>
-<p>With 3 retry attempts and a 30-second interval, the script waits about 90 seconds before declaring a server unreachable and sending an alert. Since the cron job runs every 5 minutes, this allows time for brief downtimes or scheduled reboots, avoiding unnecessary alerts for short interruptions like maintenance.</p>
+<p>With 3 retry attempts and a 30-second interval, the script waits ~90 seconds before declaring a server unreachable. This reduces unnecessary alerts for brief downtimes, like reboots.</p>
 <h2 id="conclusion">Conclusion</h2>
-<p>Since ping data collection can fail unexpectedly, this backup ping monitoring script acts as a reliable fallback for basic connectivity checks. It operates independently of the main service, is lightweight, and can be customized as needed:</p>
-<ul>
-<li>Independent of the primary system.</li>
-<li>Minimal resource usage.</li>
-<li>Customizable retry limits, intervals, and email alerts.</li>
-</ul>
+<p>The false alert caused by the monitoring collector led us to realize that the server was never down, despite the loss of ping data. Having a fallback ping monitoring script offers a reliable alternative for connectivity checks, ensuring you’re not misled by false positives from external services. This backup system is lightweight, customizable, and independent of the main monitoring service.</p>
 
     </div>
     
