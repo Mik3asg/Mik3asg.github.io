@@ -91,9 +91,9 @@ Analysis A ticket was raised with our IT service provider, who manages our cloud
       </div>
     </header>
     <div class="post-content">
-      <h2 id="problem-statement">Problem Statement</h2>
+      <h1 id="problem-statement">Problem Statement</h1>
 <p>On Friday, September 6th at 21:31, we received an alert from LogicMonitor, our cloud monitoring service, indicating that one of our production web app servers (Tomcat#3) was down. Receiving such an alert late on a Friday is never ideal. After SSH-ing into the server, I confirmed it was still operational, pointing to an issue with the monitoring system rather than the VM.</p>
-<h2 id="analysis">Analysis</h2>
+<h1 id="analysis">Analysis</h1>
 <p>A ticket was raised with our IT service provider, who manages our cloud workloads and VMs. Their investigation revealed:</p>
 <ol>
 <li>Ping data stopped at 16:09 the same day.</li>
@@ -101,64 +101,55 @@ Analysis A ticket was raised with our IT service provider, who manages our cloud
 <li>Other servers in the same environment (e.g., Tomcat#1) were successfully reporting ping data.</li>
 </ol>
 <p>Their investigation concluded that the LogicMonitor collector responsible for ping monitoring had encountered an issue, causing the false alert. After they resolved the problem, ping monitoring resumed as expected.</p>
-<h2 id="proposed-alternative-backup-ping-monitoring-script">Proposed Alternative: Backup Ping Monitoring Script</h2>
-<p>To avoid relying solely on a third-party service for critical ping checks, I created a backup ping monitoring script that runs on a separate virtual machine. This script regularly pings target servers and sends email alerts if a server fails to respond after multiple attempts.</p>
-<p>This solution, while lacking advanced metrics or graphs, ensures basic network connectivity monitoring, especially if the main system fails.</p>
-<h3 id="gmail-configuration-for-smtp-authentication">Gmail Configuration for SMTP Authentication</h3>
+<h1 id="proposed-alternative-backup-ping-monitoring-script">Proposed Alternative: Backup Ping Monitoring Script</h1>
+<p>To avoid relying entirely on third-party services for ping checks, I developed a backup ping monitoring script. Running on a separate VM, it regularly pings target servers and sends email alerts if any fail to respond after multiple attempts. While it lacks advanced metrics or graphs, it provides a simple, effective fallback for basic network connectivity monitoring.</p>
+<h2 id="environment-setup">Environment setup:</h2>
+<p>This backup ping monitoring solution was implemented and tested in an AWS environment. The setup included 4 EC2 instances:</p>
+<ul>
+<li>1 EC2 instance as the <code>ping-monitoring server</code>.</li>
+<li>2 EC2 instance as <code>target hosts</code>.</li>
+</ul>
+<h2 id="implementation-steps">Implementation steps</h2>
+<p>Steps 1 through 3 are the prerequisites before running the <code>ping-failure-alert.sh</code> script on the monitoring server.</p>
+<h3 id="step-1---allow-icmp-through-the-firewall">Step 1 - Allow ICMP Through the Firewall</h3>
+<ul>
+<li><strong>Monitoring Server:</strong> Allow outbound ICMP traffic (ping) for all destinations.</li>
+<li><strong>Target Servers:</strong> Allow inbound ICMP traffic (ping), but restrict it to the monitoring server&rsquo;s IP.</li>
+<li><strong>Test Connectivity</strong>: Use the ping command from the monitoring server to ensure each target server is reachable and ICMP is enabled: <code>ping &lt;target_host_public_IP_address&gt;</code></li>
+</ul>
+<h3 id="step-2---install-mailx-package-to-enable-email-notification">Step 2 - Install <code>mailx</code> package to enable email notification</h3>
+<p><code>mailx</code> is a command-line email client used in Unix-like systems to send and receive emails directly from the terminal or within scripts.</p>
+<ul>
+<li>For Debian/Ubuntu: <code>sudo apt-get install mailx</code></li>
+<li>For RHEL/CentOS: <code>sudo yum install mailx</code></li>
+<li>For Fedora: <code>sudo dnf install mailx</code></li>
+</ul>
+<h3 id="step-3---gmail-configuration-for-smtp-authentication">Step 3 - Gmail Configuration for SMTP Authentication</h3>
 <p>To ensure that the script can send email notifications using Gmail’s SMTP service, you need to configure Gmail accordingly. Follow these steps:</p>
-<ol>
-<li>Enable App Passwords for Gmail:
-If you have Two-Step Verification enabled:
-Go to <code>Google Account Security</code>.
-Under <code>Signing in to Google</code>, enable <code>App Passwords</code>.
-Create an App Password for Mail.
-Use the generated password in the script (<code>/etc/mail.rc</code>) as follows:</li>
-</ol>
+<h4 id="enable-app-passwords-for-gmail">Enable App Passwords for Gmail:</h4>
+<p>If you have Two-Step Verification enabled:</p>
+<ul>
+<li>Go to <code>Google Account &gt; Security &gt; Signing in to Google, App Passwords</code></li>
+<li>Type a name in the <code>App name</code> field to create an App Password</li>
+</ul>
+<h4 id="configure-generate-app-password-in-etcmailrc-on-the-monitoring-server">Configure Generate App password in <code>/etc/mail.rc</code> on the Monitoring Server</h4>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">set smtp<span style="color:#f92672">=</span>smtps://smtp.gmail.com:465
 set smtp-auth<span style="color:#f92672">=</span>login
-set smtp-auth-user<span style="color:#f92672">=</span>&lt;your_email_id&gt;@gmail.com
-set smtp-auth-password<span style="color:#f92672">=</span>&lt;your_generated_app_password&gt;
+set smtp-auth-user<span style="color:#f92672">=</span>&lt;your_email_id&gt;@gmail.com            <span style="color:#75715e"># provide the main Gmail address</span>
+set smtp-auth-password<span style="color:#f92672">=</span>&lt;your_generated_app_password&gt;    <span style="color:#75715e"># do not leave any spaces between characters</span>
 set ssl-verify<span style="color:#f92672">=</span>ignore
-</code></pre></div><ol start="2">
-<li>Allow Less Secure Apps (Optional, Not Recommended for Two-Step Accounts):
-If you don&rsquo;t use Two-Step Verification, enable Less Secure Apps from your Google Account settings.
-Once you have the Gmail SMTP authentication set up, you are ready to configure the script and its settings.</li>
-</ol>
-<h3 id="ping-monitoring-script">Ping Monitoring Script</h3>
+</code></pre></div><h3 id="step-4---ping-monitoring-script">Step 4 - Ping Monitoring Script</h3>
 <p>The bash script below pings the servers and sends alerts via email if they are unreachable.</p>
+<ul>
+<li>Ensure the script is executable (<code>chmod +x ping-failure-alert.sh</code>).</li>
+<li>Restrict access to <code>root</code> only for security.</li>
+</ul>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#################################################################################</span>
 <span style="color:#75715e"># Script Name: ping-failure-alert.sh</span>
 <span style="color:#75715e"># Description: This script pings a predefined list of server IP addresses to check</span>
 <span style="color:#75715e">#              their network connectivity. If any servers fail to respond after</span>
 <span style="color:#75715e">#              a specified number of attempts and interval, an email notification</span>
 <span style="color:#75715e">#              is sent.</span>
-<span style="color:#75715e">#</span>
-<span style="color:#75715e"># Pre-requisites:</span>
-<span style="color:#75715e">#   - Install the &#39;mailx&#39; package to enable email notifications.</span>
-<span style="color:#75715e">#       For Debian/Ubuntu: sudo apt-get install mailx</span>
-<span style="color:#75715e">#       For RHEL/CentOS: sudo yum install mailx</span>
-<span style="color:#75715e">#       For Fedora: sudo dnf install mailx</span>
-<span style="color:#75715e">#   - Ensure ICMP (Internet Control Message Protocol) is allowed through the</span>
-<span style="color:#75715e">#     firewall on both this server (for outgoing pings) and on the target servers</span>
-<span style="color:#75715e">#     (for incoming pings).</span>
-<span style="color:#75715e">#   - SMTP Configuration: Configure the SMTP settings in &#39;/etc/mail.rc&#39; to use Gmail&#39;s SMTP server:</span>
-<span style="color:#75715e">#       # Set SMTP to use Gmail&#39;s SMTP server</span>
-<span style="color:#75715e">#       set smtp=smtps://smtp.gmail.com:465</span>
-<span style="color:#75715e">#       set smtp-auth=login</span>
-<span style="color:#75715e">#       set smtp-auth-user=&lt;your_email_id&gt;@gmail.com</span>
-<span style="color:#75715e">#       set smtp-auth-password=&lt;app_password_from_gmail_security&gt;</span>
-<span style="color:#75715e">#       set ssl-verify=ignore</span>
-<span style="color:#75715e">#       set nss-config-dir=/etc/pki/nssdb</span>
-<span style="color:#75715e">#   - Update the recipient email addresses and target/client IP addresses in the</span>
-<span style="color:#75715e">#     script to match your specific requirements.</span>
-<span style="color:#75715e">#   - Before running this script, test that each target server is reachable via</span>
-<span style="color:#75715e">#     the ping command to confirm that ICMP is enabled on the target servers.</span>
-<span style="color:#75715e">#       Example: ping -c 1 192.168.1.202</span>
-<span style="color:#75715e">#</span>
-<span style="color:#75715e"># Usage:</span>
-<span style="color:#75715e">#   - Provide the recipient email addresses in the script</span>
-<span style="color:#75715e">#   - Run script using: ./ping-failure-alert.sh</span>
-<span style="color:#75715e">#</span>
 <span style="color:#75715e"># Author: Mickael Asghar</span>
 <span style="color:#75715e"># Created on: 07/06/2024</span>
 <span style="color:#75715e"># Updated on: 07/06/2024</span>
@@ -175,9 +166,9 @@ cc_recipients<span style="color:#f92672">=(</span><span style="color:#e6db74">&#
 </span><span style="color:#e6db74">
 </span><span style="color:#e6db74"># Associative array of server IP addresses and their hostnames
 </span><span style="color:#e6db74">declare -A ping_targets=(
-</span><span style="color:#e6db74">    [&#34;</span>192.168.1.202<span style="color:#e6db74">&#34;]=&#34;</span>Server 01<span style="color:#e6db74">&#34;
-</span><span style="color:#e6db74">    [&#34;</span>192.168.1.203<span style="color:#e6db74">&#34;]=&#34;</span>Server 02<span style="color:#e6db74">&#34;
-</span><span style="color:#e6db74">    [&#34;</span>192.168.1.204<span style="color:#e6db74">&#34;]=&#34;</span>Server 03<span style="color:#e6db74">&#34;
+</span><span style="color:#e6db74">    [&#34;</span>192.168.1.202<span style="color:#e6db74">&#34;]=&#34;</span>target_host#1<span style="color:#e6db74">&#34;    # adjust IP address and hostname
+</span><span style="color:#e6db74">    [&#34;</span>192.168.1.203<span style="color:#e6db74">&#34;]=&#34;</span>target_host#2<span style="color:#e6db74">&#34;    # adjust IP address and hostname
+</span><span style="color:#e6db74">    [&#34;</span>192.168.1.204<span style="color:#e6db74">&#34;]=&#34;</span>target_host#3<span style="color:#e6db74">&#34;    # adjust IP address and hostname
 </span><span style="color:#e6db74">)
 </span><span style="color:#e6db74">
 </span><span style="color:#e6db74"># Retry settings
@@ -229,17 +220,11 @@ cc_recipients<span style="color:#f92672">=(</span><span style="color:#e6db74">&#
 </span><span style="color:#e6db74">fi
 </span></code></pre></div><h3 id="key-settings">Key Settings:</h3>
 <ul>
-<li><strong>Pre-requisites:</strong> Check the instructions provided in the comment section in the top of the script.</li>
 <li><strong>Retry Attempts (retry_count):</strong> The script will try to ping each server 3 times before declaring it unreachable.</li>
 <li><strong>Interval Between Retries (retry_interval):</strong> There is a 30-second interval between retries. This ensures that short downtimes (e.g., server reboot) will not trigger immediate false alerts.</li>
+<li><strong>Adjust values accordingly to meet your requirements</strong>: <code>recipient_email</code>, <code>cc_recipients</code>, <code>target_host_IP</code>, <code>target_hostname</code></li>
 </ul>
-<h3 id="benefits">Benefits:</h3>
-<ul>
-<li><strong>Independent Monitoring:</strong> The script operates independently of the primary monitoring system, providing a backup solution for checking server connectivity.</li>
-<li><strong>Lightweight:</strong> It runs on a lightweight virtual machine and does not interfere with production workloads.</li>
-<li><strong>Customisable:</strong> Retry limits, ping intervals, and recipient emails can easily be modified to fit specific needs.</li>
-</ul>
-<h3 id="set-up-the-script-as-a-cron-job">Set up the Script as a Cron Job</h3>
+<h3 id="step-5---set-up-the-script-as-a-cron-job">Step 5 - Set up the Script as a Cron Job</h3>
 <p>To make the script run automatically at regular intervals, we set it up as a cron job. In this case, I recommend running the script every 5 minutes, which provides frequent monitoring while avoiding unnecessary load.</p>
 <ol>
 <li>Open Crontab:</li>
@@ -255,7 +240,12 @@ cc_recipients<span style="color:#f92672">=(</span><span style="color:#e6db74">&#
 <h3 id="avoiding-unnecessary-alerts">Avoiding Unnecessary Alerts</h3>
 <p>With 3 retry attempts and a 30-second interval, the script waits about 90 seconds before declaring a server unreachable and sending an alert. Since the cron job runs every 5 minutes, this allows time for brief downtimes or scheduled reboots, avoiding unnecessary alerts for short interruptions like maintenance.</p>
 <h2 id="conclusion">Conclusion</h2>
-<p>While LogicMonitor provides robust monitoring and visualization, it can occasionally fail due to issues with ping data collection, as we experienced. By implementing this backup ping monitoring script, we ensure basic connectivity checks independent of our primary monitoring service. This solution is easy to set up, lightweight, and serves as a safeguard in case of future monitoring system failures.</p>
+<p>Since ping data collection can fail unexpectedly, this backup ping monitoring script acts as a reliable fallback for basic connectivity checks. It operates independently of the main service, is lightweight, and can be customized as needed:</p>
+<ul>
+<li>Independent of the primary system.</li>
+<li>Minimal resource usage.</li>
+<li>Customizable retry limits, intervals, and email alerts.</li>
+</ul>
 
     </div>
     
