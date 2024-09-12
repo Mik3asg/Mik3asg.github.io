@@ -13,9 +13,8 @@
       <pubDate>Tue, 10 Sep 2024 16:44:01 +0100</pubDate>
       
       <guid>https://Mik3asg.github.io/posts/implementating-backup-ping-monitoring-solution/</guid>
-      <description>Problem Statement On Friday, September 6th at 21:31, we received an alert from LogicMonitor indicating one of our production web app servers (Tomcat#3) was down. Upon investigation via SSH, I confirmed the server was operational, suggesting the issue was with the monitoring system rather than the VM.
-Analysis A ticket was raised with our IT service provider, who manages our cloud workloads and VMs. Their investigation revealed:
- Ping data stopped at 16:09 the same day.</description>
+      <description>Problem Statement On Friday 6th September 2024 at 21:31, we received an alert from LogicMonitor indicating one of our production web app servers (Tomcat#3) was down, with the message: &amp;quot;The host Tomcat#3 (i-xxxxxxx) is down&amp;quot;. However, shortly after receiving the alert, we attempted to SSH into the VM and confirmed that the server was fully operational.
+Root Cause Investigation and Resolution A ticket was promptly raised with our IT service provider, responsible for managing our Cloud Production workloads, immediately following the alert.</description>
     </item>
     
     <item>

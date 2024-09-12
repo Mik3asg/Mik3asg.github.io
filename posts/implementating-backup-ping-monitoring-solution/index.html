@@ -14,14 +14,12 @@
     
     <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Dealing with False Ping Alerts in LogicMonitor: Building a Fallback Ping Monitoring Script for Production VMs"/>
-<meta name="twitter:description" content="Problem Statement On Friday, September 6th at 21:31, we received an alert from LogicMonitor indicating one of our production web app servers (Tomcat#3) was down. Upon investigation via SSH, I confirmed the server was operational, suggesting the issue was with the monitoring system rather than the VM.
-Analysis A ticket was raised with our IT service provider, who manages our cloud workloads and VMs. Their investigation revealed:
- Ping data stopped at 16:09 the same day."/>
+<meta name="twitter:description" content="Problem Statement On Friday 6th September 2024 at 21:31, we received an alert from LogicMonitor indicating one of our production web app servers (Tomcat#3) was down, with the message: &quot;The host Tomcat#3 (i-xxxxxxx) is down&quot;. However, shortly after receiving the alert, we attempted to SSH into the VM and confirmed that the server was fully operational.
+Root Cause Investigation and Resolution A ticket was promptly raised with our IT service provider, responsible for managing our Cloud Production workloads, immediately following the alert."/>
 
     <meta property="og:title" content="Dealing with False Ping Alerts in LogicMonitor: Building a Fallback Ping Monitoring Script for Production VMs" />
-<meta property="og:description" content="Problem Statement On Friday, September 6th at 21:31, we received an alert from LogicMonitor indicating one of our production web app servers (Tomcat#3) was down. Upon investigation via SSH, I confirmed the server was operational, suggesting the issue was with the monitoring system rather than the VM.
-Analysis A ticket was raised with our IT service provider, who manages our cloud workloads and VMs. Their investigation revealed:
- Ping data stopped at 16:09 the same day." />
+<meta property="og:description" content="Problem Statement On Friday 6th September 2024 at 21:31, we received an alert from LogicMonitor indicating one of our production web app servers (Tomcat#3) was down, with the message: &quot;The host Tomcat#3 (i-xxxxxxx) is down&quot;. However, shortly after receiving the alert, we attempted to SSH into the VM and confirmed that the server was fully operational.
+Root Cause Investigation and Resolution A ticket was promptly raised with our IT service provider, responsible for managing our Cloud Production workloads, immediately following the alert." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://Mik3asg.github.io/posts/implementating-backup-ping-monitoring-solution/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2024-09-10T16:44:01+01:00" />
@@ -77,7 +75,7 @@ Analysis A ticket was raised with our IT service provider, who manages our cloud
   <title>clock</title>
   <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
 </svg>
-          5 min read
+          6 min read
         </div>
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag">
@@ -94,25 +92,25 @@ Analysis A ticket was raised with our IT service provider, who manages our cloud
     </header>
     <div class="post-content">
       <h1 id="problem-statement">Problem Statement</h1>
-<p>On Friday, September 6th at 21:31, we received an alert from LogicMonitor indicating one of our production web app servers (Tomcat#3) was down. Upon investigation via SSH, I confirmed the server was operational, suggesting the issue was with the monitoring system rather than the VM.</p>
-<h1 id="analysis">Analysis</h1>
-<p>A ticket was raised with our IT service provider, who manages our cloud workloads and VMs. Their investigation revealed:</p>
-<ol>
-<li>Ping data stopped at 16:09 the same day.</li>
-<li>All other metrics reported normally, except for ping.</li>
-<li>Other servers in the same environment (e.g., Tomcat#1) were successfully reporting ping data.</li>
-</ol>
-<p>Despite the alert, the server was fully operational. The ping data stopped reporting due to an issue with the monitoring collector, which led to the false alert. Once the issue was resolved, ping monitoring resumed as expected.</p>
+<p>On Friday 6th September 2024 at 21:31, we received an alert from LogicMonitor indicating one of our production web app servers (Tomcat#3) was down, with the message: <code>&quot;The host Tomcat#3 (i-xxxxxxx) is down&quot;</code>. However, shortly after receiving the alert, we attempted to SSH into the VM and confirmed that the server was fully operational.</p>
+<h1 id="root-cause-investigation-and-resolution">Root Cause Investigation and Resolution</h1>
+<p>A ticket was promptly raised with our IT service provider, responsible for managing our Cloud Production workloads, immediately following the alert. Their investigation provided the following findings:</p>
+<ul>
+<li><strong>1. Ping Data:</strong> Ping data from the server stopped reporting at 16:09 on the same day.</li>
+<li><strong>2. Other Metrics:</strong> All other performance metrics from the server were reported normally, indicating that the server was functioning properly aside from the ping data issue.</li>
+<li><strong>3. Environment Consistency:</strong> Other servers in the same environment (e.g., Tomcat#1) continued to report ping data normally, indicating that the issue was isolated to Tomcat#3.</li>
+</ul>
+<p>Upon further analysis by our service provider, it was determined that the ping data had stopped reporting at 16:09, resulting in a delayed false alert at 21:31. The root cause of the issue was traced to a malfunction in the service provider&rsquo;s monitoring tool, which failed to capture ping data properly. Once the issue with the monitoring tool&rsquo;s collector was resolved on Monday, September 9th, ping monitoring resumed, and the false alert was cleared.</p>
 <h2 id="graph-explanation">Graph Explanation</h2>
 <p>The graph below shows that the ping metrics, including round-trip time and packet counts, were being reported normally up until 16:09 on September 6th. After that, no new ping data was collected, confirming the issue was related to the monitoring service rather than the server itself.</p>
 <p><img src="/ping_data_loss_tomcat_3.PNG" alt="ping-data-loss-tomcat-3"></p>
-<h1 id="proposed-alternative-fallback-ping-monitoring-script">Proposed Alternative: Fallback Ping Monitoring Script</h1>
-<p>To reduce reliance on third-party monitoring services, I created a fallback ping monitoring script. Running on a separate VM acting, it pings target servers and sends email alerts if they don’t respond after several attempts. It’s a simple fallback solution for basic connectivity checks.</p>
+<h1 id="in-house-alternative-solution-fallback-ping-monitoring-script">In-House Alternative Solution: Fallback Ping Monitoring Script</h1>
+<p>To reduce reliance on third-party monitoring services, I created a fallback ping monitoring script. Running on a separate VM, it pings target servers and sends email alerts if they don’t respond after several attempts. It’s a simple fallback solution for basic connectivity checks.</p>
 <h2 id="environment-setup">Environment setup:</h2>
 <p>This fallback ping monitoring solution was implemented and tested in an AWS environment. The setup included 3 EC2 instances:</p>
 <ul>
-<li>1 EC2 instance  the <code>ping-monitoring server</code> (our VM, not a service provider’s monitoring system).</li>
-<li>2 EC2 instance as <code>target hosts</code>.</li>
+<li>1 EC2 instance acting as the <code>ping-monitoring server</code> (our VM, not a service provider’s monitoring system).</li>
+<li>2 EC2 instance as the <code>target hosts</code>.</li>
 </ul>
 <h2 id="implementation-steps">Implementation steps</h2>
 <p>Steps 1 through 3 are the prerequisites before running the ping-failure-alert.sh script on our dedicated VM, which is acting as the monitoring server (not the service provider&rsquo;s monitoring system).</p>
